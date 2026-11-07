@@ -95,7 +95,11 @@
     for (const row of rows) {
       const tr = document.createElement('tr'); const image = images.get(numericImageId(row.imageId));
       tr.innerHTML = `<td>${row.id || '—'}</td><td></td><td></td><td></td><td class="${image ? 'yes' : 'no'}"></td>`;
-      tr.children[1].textContent = row.en || '—'; tr.children[2].textContent = row.vi || '—'; tr.children[3].textContent = row.imageId || '—';
+      const englishInput = document.createElement('input'); englishInput.className = 'table-text-input'; englishInput.value = row.en; englishInput.setAttribute('aria-label', `English dòng ${row.sourceRow}`);
+      englishInput.addEventListener('input', () => { row.en = englishInput.value.trim(); }); tr.children[1].append(englishInput);
+      const vietInput = document.createElement('input'); vietInput.className = 'table-text-input'; vietInput.value = row.vi; vietInput.setAttribute('aria-label', `Viet dòng ${row.sourceRow}`);
+      vietInput.addEventListener('input', () => { row.vi = vietInput.value.trim(); }); tr.children[2].append(vietInput);
+      tr.children[3].textContent = row.imageId || '—';
       if (image) { const thumb = document.createElement('img'); thumb.className = 'thumbnail'; thumb.alt = `Ảnh ${row.en}`; thumb.src = await imageUrl(image); tr.children[4].append(thumb); }
       else tr.children[4].textContent = '✕ Thiếu ảnh'; previewBody.append(tr);
     }
@@ -116,7 +120,7 @@
   const COLS_PER_A5 = 6; const CARDS_PER_COL = 7;
   function validRows() { return state.rows.filter((item) => state.images.has(numericImageId(item.imageId))); }
   function mm(value) { return value * 72 / 25.4; }
-  function pageDimensions() { return [mm(210), mm(148)]; }
+  function pageDimensions() { return [mm(148), mm(210)]; }
   function buildPages(items) {
     const capacity = COLS_PER_A5 * CARDS_PER_COL;
     if (items.length <= capacity) {
@@ -172,7 +176,7 @@
     if (!state.checked) return; const valid = validRows(); if (!valid.length) { setNotice('Không có thẻ nào có đủ ảnh để xuất.', 'error'); return; }
     const layoutPages = buildPages(valid); exportButton.disabled = true;
     try {
-      setProgress('Đang nhúng font và ảnh vào PDF…'); const { PDFDocument, rgb } = PDFLib; const pdfDoc = await PDFDocument.create(); pdfDoc.registerFontkit(fontkit); const font = await pdfDoc.embedFont(await fetchFont('assets/fonts/KGPrimaryPenmanshipAlt.ttf'), { subset: true }); const [pageW, pageH] = pageDimensions(); const margin = mm(5); const cardW = (pageW - margin * 2) / COLS_PER_A5; const cardH = (pageH - margin * 2) / CARDS_PER_COL; const imageCache = new Map();
+      setProgress('Đang nhúng font và ảnh vào PDF…'); const { PDFDocument, rgb } = PDFLib; const pdfDoc = await PDFDocument.create(); pdfDoc.registerFontkit(fontkit); const font = await pdfDoc.embedFont(await fetchFont('assets/fonts/KGPrimaryPenmanshipAlt.ttf'), { subset: true }); const [pageW, pageH] = pageDimensions(); const margin = mm(1); const cardW = (pageW - margin * 2) / COLS_PER_A5; const cardH = (pageH - margin * 2) / CARDS_PER_COL; const imageCache = new Map();
       for (let pageNo = 0; pageNo < layoutPages.length; pageNo += 1) {
         const page = pdfDoc.addPage([pageW, pageH]);
         for (const { item, col, row } of layoutPages[pageNo].placements.flat()) {

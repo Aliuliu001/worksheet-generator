@@ -2,6 +2,14 @@
 
 **Trạng thái hiện tại:** Đang hoàn thiện riêng phần thẻ hình A5 tự động. Phase 2, 3, 4 tạm ngưng; chỉ lập lại kế hoạch các phase đó sau khi phần thẻ hình được anh duyệt xong.
 
+## Việc đang làm trước Phase 2
+
+1. Đổi bản in sang **A5 dọc**, vẫn 6 cột × 7 hàng, lề PDF 1 mm để tận dụng tối đa diện tích in.
+2. Giảm chiều cao ảnh xem trước trong bảng web, giữ nguyên bề ngang 120 px; việc này không ảnh hưởng ảnh/PDF khi in.
+3. Cho phép sửa trực tiếp ô **English** và **Viet** tại bảng Kiểm tra dữ liệu. Giá trị đã sửa phải dùng ngay cho Xem toàn bộ PDF và Tạo PDF, không cần tải Excel lại.
+4. Kiểm tra thật bằng Excel + ZIP: số dòng, ảnh, preview canvas A5 dọc và PDF tải xuống.
+5. Chỉ khi anh duyệt phần thẻ hình này mới viết lại kế hoạch Phase 2–4.
+
 ---
 
 ## Phase 1: Hoàn thiện phần nhập liệu và preview
