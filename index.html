@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#5c4a3a">
+  <title>Tạo thẻ hình để dán vở</title>
+  <link rel="stylesheet" href="assets/css/style.css?v=1">
+</head>
+<body>
+  <main class="page-shell">
+    <header>
+      <p class="eyebrow">BỘ TẠO THẺ HÌNH</p>
+      <h1>Tạo thẻ hình để cắt dán vào vở</h1>
+      <p class="intro">Chọn 1 Excel và 1 ZIP ảnh. Trang này tự tạo PDF A5 gồm 6 cột × 7 hình — không tải dữ liệu của anh lên đâu cả.</p>
+    </header>
+
+    <section class="card" aria-labelledby="input-title">
+      <h2 id="input-title">1. Chọn 2 file đầu vào</h2>
+      <div class="upload-grid">
+        <label class="file-box" id="excel-box">
+          <span class="file-icon">📗</span>
+          <span><strong>Chọn file Excel</strong><small>Có 3 cột: STT, tiếng Anh, tiếng Việt</small></span>
+          <input id="excel-file" type="file" accept=".xlsx,.xls,.csv" hidden>
+        </label>
+        <label class="file-box" id="zip-box">
+          <span class="file-icon">🖼️</span>
+          <span><strong>Chọn file ZIP chứa ảnh</strong><small>Đặt tên ảnh theo STT: 1.png, 2.jpg…</small></span>
+          <input id="zip-file" type="file" accept=".zip" hidden>
+        </label>
+      </div>
+      <div class="file-status" id="file-status" aria-live="polite">Chưa chọn file nào.</div>
+    </section>
+
+    <section class="card" aria-labelledby="setup-title">
+      <h2 id="setup-title">2. Cài đặt bản in</h2>
+      <div class="settings-grid">
+        <label>Khổ giấy
+          <select id="page-size"><option value="A5" selected>A5</option><option value="A4">A4</option></select>
+        </label>
+        <label>Số cột
+          <input id="columns" type="number" min="1" max="8" value="6">
+        </label>
+        <label>Số hình mỗi cột
+          <input id="rows" type="number" min="1" max="12" value="7">
+        </label>
+        <label>Số bộ giống nhau cần in
+          <input id="sets" type="number" min="0" max="100" value="0">
+        </label>
+        <p class="setting-note">Để <strong>0</strong> = tự lấp đầy một trang bằng các bộ nguyên vẹn, giống Colab cũ.</p>
+      </div>
+      <p class="hint">Với 6 cột × 7 hình: 1 bộ có tối đa 42 từ. Nếu ít hơn, các ô cuối sẽ để trống.</p>
+    </section>
+
+    <section class="card" aria-labelledby="check-title">
+      <div class="section-heading">
+        <div><h2 id="check-title">3. Kiểm tra dữ liệu</h2><p>Đọc Excel và ZIP trước khi tạo file.</p></div>
+        <button class="button secondary" id="check-button" type="button">🔍 Kiểm tra file</button>
+      </div>
+      <div id="notice" class="notice muted">Chọn đủ Excel và ZIP, sau đó bấm “Kiểm tra file”.</div>
+      <div class="table-wrap" id="preview-wrap" hidden>
+        <table><thead><tr><th>STT</th><th>Tiếng Anh</th><th>Ảnh</th></tr></thead><tbody id="preview-body"></tbody></table>
+      </div>
+    </section>
+
+    <section class="card action-card" aria-labelledby="export-title">
+      <h2 id="export-title">4. Tạo PDF</h2>
+      <p>PDF dùng font viết tay KG Primary anh gửi. Khi in, chọn <strong>Actual size / 100%</strong>, không chọn “Fit to page”.</p>
+      <button class="button primary" id="export-button" type="button" disabled>📄 Tạo và tải PDF thẻ hình</button>
+      <div class="progress" id="progress" aria-live="polite"></div>
+    </section>
+
+    <section class="card guide">
+      <h2>Excel cần như thế nào?</h2>
+      <p>Trang đọc được cả file không có tiêu đề (cột 1 = tiếng Anh, cột 2 = tiếng Việt, cột 3 = STT) như Colab cũ, hoặc file có tiêu đề <code>stt</code>, <code>en</code>, <code>vi</code>.</p>
+      <p>Ảnh trong ZIP có thể nằm trong thư mục con, miễn tên file là đúng số STT. Ví dụ: <code>1.png</code>, <code>2.jpg</code>.</p>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@pdf-lib/fontkit@1.1.1/dist/fontkit.umd.min.js"></script>
+  <script src="assets/js/app.js?v=2"></script>
+</body>
+</html>
