@@ -90,18 +90,23 @@
     if (!rows.length) errors.push('Excel không có dòng từ vựng hợp lệ (dòng tiêu đề không được tính là từ).'); return { errors, warnings };
   }
   async function imageUrl(imageInfo) { const blob = await imageInfo.entry.async('blob'); const url = URL.createObjectURL(new Blob([blob], { type: imageInfo.type })); state.urls.push(url); return url; }
+  async function renderImageCell(cell, row, images) {
+    cell.replaceChildren(); const image = images.get(numericImageId(row.imageId));
+    cell.className = image ? 'yes' : 'no';
+    if (!image) { cell.textContent = '✕ Thiếu ảnh'; return; }
+    const thumb = document.createElement('img'); thumb.className = 'thumbnail'; thumb.alt = `Ảnh ${row.en}`; thumb.src = await imageUrl(image); cell.append(thumb);
+  }
   async function renderPreview(rows, images) {
     previewBody.replaceChildren();
     for (const row of rows) {
-      const tr = document.createElement('tr'); const image = images.get(numericImageId(row.imageId));
-      tr.innerHTML = `<td>${row.id || '—'}</td><td></td><td></td><td></td><td class="${image ? 'yes' : 'no'}"></td>`;
+      const tr = document.createElement('tr'); tr.innerHTML = `<td>${row.id || '—'}</td><td></td><td></td><td></td><td></td>`;
       const englishInput = document.createElement('input'); englishInput.className = 'table-text-input'; englishInput.value = row.en; englishInput.setAttribute('aria-label', `English dòng ${row.sourceRow}`);
       englishInput.addEventListener('input', () => { row.en = englishInput.value.trim(); }); tr.children[1].append(englishInput);
       const vietInput = document.createElement('input'); vietInput.className = 'table-text-input'; vietInput.value = row.vi; vietInput.setAttribute('aria-label', `Viet dòng ${row.sourceRow}`);
       vietInput.addEventListener('input', () => { row.vi = vietInput.value.trim(); }); tr.children[2].append(vietInput);
-      tr.children[3].textContent = row.imageId || '—';
-      if (image) { const thumb = document.createElement('img'); thumb.className = 'thumbnail'; thumb.alt = `Ảnh ${row.en}`; thumb.src = await imageUrl(image); tr.children[4].append(thumb); }
-      else tr.children[4].textContent = '✕ Thiếu ảnh'; previewBody.append(tr);
+      const imageIdInput = document.createElement('input'); imageIdInput.className = 'table-text-input'; imageIdInput.value = row.imageId; imageIdInput.inputMode = 'numeric'; imageIdInput.setAttribute('aria-label', `ID ảnh dòng ${row.sourceRow}`);
+      imageIdInput.addEventListener('input', async () => { row.imageId = imageIdInput.value.trim(); await renderImageCell(tr.children[4], row, images); }); tr.children[3].append(imageIdInput);
+      await renderImageCell(tr.children[4], row, images); previewBody.append(tr);
     }
     previewWrap.hidden = false;
   }
@@ -146,8 +151,8 @@
       for (const placement of pages[pageNo].placements.flat()) {
         const { item, col, row } = placement; const x = margin + col * cardW; const y = margin + row * cardH;
         ctx.fillStyle = '#f8fbff'; ctx.strokeStyle = '#c7e2f8'; ctx.lineWidth = 1; ctx.fillRect(x, y, cardW, cardH); ctx.strokeRect(x, y, cardW, cardH);
-        ctx.fillStyle = '#2d241d'; let fontSize = Math.min(cardH * .2, 20); ctx.font = `${fontSize}px KGPen, sans-serif`; while (ctx.measureText(item.en).width > cardW - 12 && fontSize > 7) { fontSize -= 1; ctx.font = `${fontSize}px KGPen, sans-serif`; } ctx.textAlign = 'center'; ctx.fillText(item.en, x + cardW / 2, y + fontSize + 4);
-        const image = new Image(); image.src = imageCache.get(item.imageId); await new Promise((resolve, reject) => { image.onload = resolve; image.onerror = () => reject(new Error(`Không đọc được ảnh ${item.imageId}.`)); }); const maxW = cardW - 10; const maxH = cardH - fontSize - 18; const scale = Math.min(maxW / image.naturalWidth, maxH / image.naturalHeight); const w = image.naturalWidth * scale; const h = image.naturalHeight * scale; ctx.drawImage(image, x + (cardW - w) / 2, y + fontSize + 9 + (maxH - h) / 2, w, h);
+        const labelSlot = Math.max(30, cardH * .23); ctx.fillStyle = '#2d241d'; let fontSize = Math.min(cardH * .2, 20); ctx.font = `${fontSize}px KGPen, sans-serif`; while (ctx.measureText(item.en).width > cardW - 12 && fontSize > 7) { fontSize -= 1; ctx.font = `${fontSize}px KGPen, sans-serif`; } ctx.textAlign = 'center'; ctx.fillText(item.en, x + cardW / 2, y + labelSlot * .68);
+        const image = new Image(); image.src = imageCache.get(item.imageId); await new Promise((resolve, reject) => { image.onload = resolve; image.onerror = () => reject(new Error(`Không đọc được ảnh ${item.imageId}.`)); }); const maxW = cardW - 10; const maxH = cardH - labelSlot - 8; const scale = Math.min(maxW / image.naturalWidth, maxH / image.naturalHeight); const w = image.naturalWidth * scale; const h = image.naturalHeight * scale; ctx.drawImage(image, x + (cardW - w) / 2, y + labelSlot + 3 + (maxH - h) / 2, w, h);
       }
       canvasPages.append(label, canvas);
     }
@@ -182,9 +187,9 @@
         for (const { item, col, row } of layoutPages[pageNo].placements.flat()) {
           const x = margin + col * cardW; const top = pageH - margin - row * cardH; const y = top - cardH;
           page.drawRectangle({ x, y, width: cardW, height: cardH, color: rgb(.973, .984, 1), borderColor: rgb(.78, .90, .98), borderWidth: .65 });
-          let size = Math.min(cardH * .20, 16); while (font.widthOfTextAtSize(item.en, size) > cardW - 7 && size > 5) size -= .4; const labelW = font.widthOfTextAtSize(item.en, size); page.drawText(item.en, { x: x + (cardW - labelW) / 2, y: top - size - 3, size, font, color: rgb(0, 0, 0) });
+          const labelSlot = Math.max(mm(7), cardH * .23); let size = Math.min(cardH * .20, 16); while (font.widthOfTextAtSize(item.en, size) > cardW - 7 && size > 5) size -= .4; const labelW = font.widthOfTextAtSize(item.en, size); page.drawText(item.en, { x: x + (cardW - labelW) / 2, y: top - labelSlot * .72, size, font, color: rgb(0, 0, 0) });
           if (!imageCache.has(item.imageId)) imageCache.set(item.imageId, await loadImage(pdfDoc, state.images.get(numericImageId(item.imageId))));
-          page.drawImage(imageCache.get(item.imageId), fit(imageCache.get(item.imageId), x + 3, y + 3, cardW - 6, cardH - size - 12));
+          page.drawImage(imageCache.get(item.imageId), fit(imageCache.get(item.imageId), x + 3, y + 3, cardW - 6, cardH - labelSlot - 8));
         }
         setProgress(`Đã tạo trang ${pageNo + 1}/${layoutPages.length}…`);
       }
