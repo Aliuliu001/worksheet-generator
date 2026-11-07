@@ -1,6 +1,6 @@
 # Kế hoạch triển khai — Bộ tạo đề kiểm tra tiếng Anh
 
-**Trạng thái hiện tại:** Đã có trang thử nghiệm đầu tiên (thẻ hình 6×7 A5). Anh yêu cầu hoàn thiện đầy đủ theo các phase bên dưới.
+**Trạng thái hiện tại:** Đang hoàn thiện riêng phần thẻ hình A5 tự động. Phase 2, 3, 4 tạm ngưng; chỉ lập lại kế hoạch các phase đó sau khi phần thẻ hình được anh duyệt xong.
 
 ---
 

@@ -113,27 +113,41 @@
     } catch (error) { console.error(error); setNotice(`Không đọc được file: ${error.message}`, 'error'); setProgress(''); }
   });
 
-  function config() { return { columns: Math.max(1, Math.min(8, Number($('columns').value) || 6)), rows: Math.max(1, Math.min(12, Number($('rows').value) || 7)), sets: Math.max(1, Math.min(100, Number($('sets').value) || 1)), size: $('page-size').value }; }
+  const COLS_PER_A5 = 6; const CARDS_PER_COL = 7;
   function validRows() { return state.rows.filter((item) => state.images.has(numericImageId(item.imageId))); }
   function mm(value) { return value * 72 / 25.4; }
-  function pageDimensions(size) { return size === 'A4' ? [mm(210), mm(297)] : [mm(210), mm(148)]; }
+  function pageDimensions() { return [mm(210), mm(148)]; }
+  function buildPages(items) {
+    const capacity = COLS_PER_A5 * CARDS_PER_COL;
+    if (items.length <= capacity) {
+      const colsPerSet = Math.ceil(items.length / CARDS_PER_COL);
+      const setsPerPage = Math.floor(COLS_PER_A5 / colsPerSet);
+      return [{ placements: Array.from({ length: setsPerPage }, (_, set) => items.map((item, itemIndex) => ({ item, col: set * colsPerSet + Math.floor(itemIndex / CARDS_PER_COL), row: itemIndex % CARDS_PER_COL }))), colsPerSet, setsPerPage }];
+    }
+    const pages = [];
+    for (let offset = 0; offset < items.length; offset += capacity) {
+      const chunk = items.slice(offset, offset + capacity);
+      pages.push({ placements: [chunk.map((item, itemIndex) => ({ item, col: Math.floor(itemIndex / CARDS_PER_COL), row: itemIndex % CARDS_PER_COL }))], colsPerSet: COLS_PER_A5, setsPerPage: 1 });
+    }
+    return pages;
+  }
   async function previewAll() {
-    if (!state.checked) return; const options = config(); const items = validRows(); const capacity = options.columns * options.rows; const pages = Math.ceil(items.length * options.sets / capacity);
-    canvasPages.replaceChildren(); previewStatus.textContent = `Đang vẽ ${pages} trang, tổng ${items.length * options.sets} thẻ…`;
+    if (!state.checked) return; const items = validRows(); const pages = buildPages(items);
+    canvasPages.replaceChildren(); previewStatus.textContent = `Đang vẽ ${pages.length} trang…`;
     const imageCache = new Map(); for (const item of items) imageCache.set(item.imageId, await imageUrl(state.images.get(numericImageId(item.imageId))));
-    const renderW = 1000; const [pdfW, pdfH] = pageDimensions(options.size); const renderH = Math.round(renderW * pdfH / pdfW);
-    for (let pageNo = 0; pageNo < pages; pageNo += 1) {
-      const label = document.createElement('p'); label.className = 'canvas-label'; label.textContent = `Trang ${pageNo + 1}/${pages}`; const canvas = document.createElement('canvas'); canvas.className = 'canvas-page'; canvas.width = renderW; canvas.height = renderH; const ctx = canvas.getContext('2d'); ctx.fillStyle = '#fffdf9'; ctx.fillRect(0, 0, renderW, renderH);
-      const margin = 24; const cardW = (renderW - margin * 2) / options.columns; const cardH = (renderH - margin * 2) / options.rows;
-      for (let cell = 0; cell < capacity; cell += 1) {
-        const itemIndex = pageNo * capacity + cell; if (itemIndex >= items.length * options.sets) continue; const item = items[itemIndex % items.length]; const col = Math.floor(cell / options.rows); const row = cell % options.rows; const x = margin + col * cardW; const y = margin + row * cardH;
+    const renderW = 1000; const [pdfW, pdfH] = pageDimensions(); const renderH = Math.round(renderW * pdfH / pdfW);
+    for (let pageNo = 0; pageNo < pages.length; pageNo += 1) {
+      const label = document.createElement('p'); label.className = 'canvas-label'; label.textContent = `Trang ${pageNo + 1}/${pages.length}`; const canvas = document.createElement('canvas'); canvas.className = 'canvas-page'; canvas.width = renderW; canvas.height = renderH; const ctx = canvas.getContext('2d'); ctx.fillStyle = '#fffdf9'; ctx.fillRect(0, 0, renderW, renderH);
+      const margin = 24; const cardW = (renderW - margin * 2) / COLS_PER_A5; const cardH = (renderH - margin * 2) / CARDS_PER_COL;
+      for (const placement of pages[pageNo].placements.flat()) {
+        const { item, col, row } = placement; const x = margin + col * cardW; const y = margin + row * cardH;
         ctx.fillStyle = '#f8fbff'; ctx.strokeStyle = '#c7e2f8'; ctx.lineWidth = 1; ctx.fillRect(x, y, cardW, cardH); ctx.strokeRect(x, y, cardW, cardH);
         ctx.fillStyle = '#2d241d'; let fontSize = Math.min(cardH * .2, 20); ctx.font = `${fontSize}px KGPen, sans-serif`; while (ctx.measureText(item.en).width > cardW - 12 && fontSize > 7) { fontSize -= 1; ctx.font = `${fontSize}px KGPen, sans-serif`; } ctx.textAlign = 'center'; ctx.fillText(item.en, x + cardW / 2, y + fontSize + 4);
         const image = new Image(); image.src = imageCache.get(item.imageId); await new Promise((resolve, reject) => { image.onload = resolve; image.onerror = () => reject(new Error(`Không đọc được ảnh ${item.imageId}.`)); }); const maxW = cardW - 10; const maxH = cardH - fontSize - 18; const scale = Math.min(maxW / image.naturalWidth, maxH / image.naturalHeight); const w = image.naturalWidth * scale; const h = image.naturalHeight * scale; ctx.drawImage(image, x + (cardW - w) / 2, y + fontSize + 9 + (maxH - h) / 2, w, h);
       }
       canvasPages.append(label, canvas);
     }
-    previewStatus.textContent = `Đã hiển thị toàn bộ ${pages} trang. Bố cục này khớp cài đặt hiện tại.`;
+    const first = pages[0]; previewStatus.textContent = items.length > 42 ? `Đã hiển thị ${pages.length} trang A5 cho 1 set ${items.length} từ.` : `Đã hiển thị 1 tờ A5: 1 set dùng ${first.colsPerSet} cột; tờ này có ${first.setsPerPage} set.`;
   }
   $('pdf-preview-button').addEventListener('click', () => previewAll().catch((error) => { console.error(error); previewStatus.textContent = `Không vẽ được preview: ${error.message}`; }));
 
@@ -155,12 +169,22 @@
   function fit(image, x, y, width, height) { const ratio = Math.min(width / image.width, height / image.height); const w = image.width * ratio; const h = image.height * ratio; return { x: x + (width - w) / 2, y: y + (height - h) / 2, width: w, height: h }; }
   async function fetchFont(url) { const response = await fetch(url); if (!response.ok) throw new Error(`Không tải được font: ${url}`); return response.arrayBuffer(); }
   async function exportPdf() {
-    if (!state.checked) return; const options = config(); const valid = validRows(); const capacity = options.columns * options.rows; if (!valid.length) { setNotice('Không có thẻ nào có đủ ảnh để xuất.', 'error'); return; }
-    const total = valid.length * options.sets; const pageCount = Math.ceil(total / capacity); exportButton.disabled = true;
+    if (!state.checked) return; const valid = validRows(); if (!valid.length) { setNotice('Không có thẻ nào có đủ ảnh để xuất.', 'error'); return; }
+    const layoutPages = buildPages(valid); exportButton.disabled = true;
     try {
-      setProgress('Đang nhúng font và ảnh vào PDF…'); const { PDFDocument, rgb } = PDFLib; const pdfDoc = await PDFDocument.create(); pdfDoc.registerFontkit(fontkit); const font = await pdfDoc.embedFont(await fetchFont('assets/fonts/KGPrimaryPenmanshipAlt.ttf'), { subset: true }); const [pageW, pageH] = pageDimensions(options.size); const margin = mm(5); const cardW = (pageW - margin * 2) / options.columns; const cardH = (pageH - margin * 2) / options.rows; const imageCache = new Map();
-      for (let pageNo = 0; pageNo < pageCount; pageNo += 1) { const page = pdfDoc.addPage([pageW, pageH]); for (let cell = 0; cell < capacity; cell += 1) { const global = pageNo * capacity + cell; if (global >= total) break; const item = valid[global % valid.length]; const col = Math.floor(cell / options.rows); const row = cell % options.rows; const x = margin + col * cardW; const top = pageH - margin - row * cardH; const y = top - cardH; page.drawRectangle({ x, y, width: cardW, height: cardH, color: rgb(.973, .984, 1), borderColor: rgb(.78, .90, .98), borderWidth: .65 }); let size = Math.min(cardH * .20, 16); while (font.widthOfTextAtSize(item.en, size) > cardW - 7 && size > 5) size -= .4; const labelW = font.widthOfTextAtSize(item.en, size); page.drawText(item.en, { x: x + (cardW - labelW) / 2, y: top - size - 3, size, font, color: rgb(0, 0, 0) }); if (!imageCache.has(item.imageId)) imageCache.set(item.imageId, await loadImage(pdfDoc, state.images.get(numericImageId(item.imageId)))); page.drawImage(imageCache.get(item.imageId), fit(imageCache.get(item.imageId), x + 3, y + 3, cardW - 6, cardH - size - 12)); } setProgress(`Đã tạo trang ${pageNo + 1}/${pageCount}…`); }
-      const bytes = await pdfDoc.save(); const url = URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' })); const a = document.createElement('a'); a.href = url; a.download = `The_Hinh_${options.size}_${options.columns}_Cot_${options.rows}_Hinh.pdf`; a.click(); setTimeout(() => URL.revokeObjectURL(url), 500); setProgress(`Đã tải PDF: ${options.sets} bản, ${total} thẻ, ${pageCount} trang.`); setNotice('Tạo PDF xong. Khi in, chọn Actual size / 100% để giữ đúng kích thước.', 'success');
+      setProgress('Đang nhúng font và ảnh vào PDF…'); const { PDFDocument, rgb } = PDFLib; const pdfDoc = await PDFDocument.create(); pdfDoc.registerFontkit(fontkit); const font = await pdfDoc.embedFont(await fetchFont('assets/fonts/KGPrimaryPenmanshipAlt.ttf'), { subset: true }); const [pageW, pageH] = pageDimensions(); const margin = mm(5); const cardW = (pageW - margin * 2) / COLS_PER_A5; const cardH = (pageH - margin * 2) / CARDS_PER_COL; const imageCache = new Map();
+      for (let pageNo = 0; pageNo < layoutPages.length; pageNo += 1) {
+        const page = pdfDoc.addPage([pageW, pageH]);
+        for (const { item, col, row } of layoutPages[pageNo].placements.flat()) {
+          const x = margin + col * cardW; const top = pageH - margin - row * cardH; const y = top - cardH;
+          page.drawRectangle({ x, y, width: cardW, height: cardH, color: rgb(.973, .984, 1), borderColor: rgb(.78, .90, .98), borderWidth: .65 });
+          let size = Math.min(cardH * .20, 16); while (font.widthOfTextAtSize(item.en, size) > cardW - 7 && size > 5) size -= .4; const labelW = font.widthOfTextAtSize(item.en, size); page.drawText(item.en, { x: x + (cardW - labelW) / 2, y: top - size - 3, size, font, color: rgb(0, 0, 0) });
+          if (!imageCache.has(item.imageId)) imageCache.set(item.imageId, await loadImage(pdfDoc, state.images.get(numericImageId(item.imageId))));
+          page.drawImage(imageCache.get(item.imageId), fit(imageCache.get(item.imageId), x + 3, y + 3, cardW - 6, cardH - size - 12));
+        }
+        setProgress(`Đã tạo trang ${pageNo + 1}/${layoutPages.length}…`);
+      }
+      const bytes = await pdfDoc.save(); const url = URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' })); const a = document.createElement('a'); a.href = url; a.download = 'The_Hinh_A5_Tu_Dong.pdf'; a.click(); setTimeout(() => URL.revokeObjectURL(url), 500); setProgress(`Đã tải PDF: ${valid.length} từ, ${layoutPages.length} trang A5.`); setNotice('Tạo PDF xong. Khi in, chọn Actual size / 100% để giữ đúng kích thước.', 'success');
     } catch (error) { console.error(error); setNotice(`Không tạo được PDF: ${error.message}`, 'error'); setProgress(''); } finally { exportButton.disabled = !state.checked; }
   }
   exportButton.addEventListener('click', exportPdf);
