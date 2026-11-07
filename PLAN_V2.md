@@ -20,7 +20,7 @@
   - Cột `STT`: số thứ tự hàng (1, 2, 3…).
   - Cột `English`: từ/cụm từ tiếng Anh.
   - Cột `Viet`: nghĩa tiếng Việt (dùng cho dạng bài sau).
-  - Cột `ID_Anh`: tên file ảnh (ví dụ `6.png`, `7.jpeg`).
+  - Cột `ID_Anh`: chỉ ghi số của ảnh (ví dụ `6`, `7`); trang tự nhận đuôi ảnh.
 
 ### 1.3. Xử lý Excel đúng cấu trúc mới
 

@@ -19,8 +19,16 @@
   function setProgress(message = '') { progress.textContent = message; }
   function clean(value) { return String(value ?? '').trim(); }
   function normalizeHeader(value) { return clean(value).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, ''); }
-  function imageType(name) { const ext = name.split('.').pop().toLowerCase(); return ({ jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png' })[ext] || null; }
-  function normalImageName(name) { return clean(name).split('/').pop().toLowerCase(); }
+  function imageType(name) { const ext = name.split('.').pop().toLowerCase(); return ({ jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp', gif: 'image/gif', bmp: 'image/bmp' })[ext] || 'image/*'; }
+  function imageKey(filename) {
+    const stem = clean(filename).split('/').pop().replace(/\.[^.]+$/, '').trim();
+    const number = Number(stem);
+    return Number.isInteger(number) && number > 0 ? String(number) : '';
+  }
+  function numericImageId(value) {
+    const number = Number(clean(value));
+    return Number.isInteger(number) && number > 0 ? String(number) : '';
+  }
   function describeFile(file, label) { return file ? `${label}: ${file.name} (${(file.size / 1024 / 1024).toFixed(1)} MB)` : `Chưa có ${label}`; }
   function describeFiles() { return `${describeFile(excelInput.files[0], 'Excel')} · ${describeFile(zipInput.files[0], 'ZIP')}`; }
   function clearUrls() { state.urls.forEach(URL.revokeObjectURL); state.urls = []; }
@@ -41,7 +49,7 @@
   });
 
   $('template-button').addEventListener('click', () => {
-    const sheet = XLSX.utils.aoa_to_sheet([['STT', 'English', 'Viet', 'ID_Anh'], [1, 'apple', 'quả táo', '1.png'], [2, 'ice cream', 'kem', '2.png']]);
+    const sheet = XLSX.utils.aoa_to_sheet([['STT', 'English', 'Viet', 'ID_Anh'], [1, 'apple', 'quả táo', 1], [2, 'ice cream', 'kem', 2]]);
     sheet['!cols'] = [{ wch: 10 }, { wch: 25 }, { wch: 25 }, { wch: 18 }];
     const book = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(book, sheet, 'Tu_vung'); XLSX.writeFile(book, 'Template_Input.xlsx');
   });
@@ -65,8 +73,9 @@
   async function parseZip(file) {
     const zip = await JSZip.loadAsync(await file.arrayBuffer()); const found = new Map(); const ignored = [];
     for (const [name, entry] of Object.entries(zip.files)) {
-      if (entry.dir) continue; const type = imageType(name); if (!type) { ignored.push(name); continue; }
-      found.set(normalImageName(name), { name, type, entry });
+      if (entry.dir) continue;
+      const key = imageKey(name); if (!key) { ignored.push(name); continue; }
+      found.set(key, { name, type: imageType(name), entry });
     }
     return { found, ignored };
   }
@@ -76,7 +85,7 @@
       if (!Number.isInteger(row.id) || row.id < 1) errors.push(`Dòng ${row.sourceRow}: STT phải là số nguyên từ 1 trở lên.`);
       else if (seen.has(row.id)) errors.push(`Dòng ${row.sourceRow}: STT ${row.id} bị trùng.`); else seen.add(row.id);
       if (!row.en) errors.push(`Dòng ${row.sourceRow}: thiếu English.`); if (!row.imageId) errors.push(`Dòng ${row.sourceRow}: thiếu ID_Anh.`);
-      else if (!images.has(normalImageName(row.imageId))) warnings.push(`Dòng ${row.sourceRow}: ID ảnh “${row.imageId}” không có trong ZIP.`);
+      else if (!images.has(numericImageId(row.imageId))) warnings.push(`Dòng ${row.sourceRow}: ID ảnh “${row.imageId}” không có trong ZIP.`);
     });
     if (!rows.length) errors.push('Excel không có dòng từ vựng hợp lệ (dòng tiêu đề không được tính là từ).'); return { errors, warnings };
   }
@@ -84,7 +93,7 @@
   async function renderPreview(rows, images) {
     previewBody.replaceChildren();
     for (const row of rows) {
-      const tr = document.createElement('tr'); const image = images.get(normalImageName(row.imageId));
+      const tr = document.createElement('tr'); const image = images.get(numericImageId(row.imageId));
       tr.innerHTML = `<td>${row.id || '—'}</td><td></td><td></td><td></td><td class="${image ? 'yes' : 'no'}"></td>`;
       tr.children[1].textContent = row.en || '—'; tr.children[2].textContent = row.vi || '—'; tr.children[3].textContent = row.imageId || '—';
       if (image) { const thumb = document.createElement('img'); thumb.className = 'thumbnail'; thumb.alt = `Ảnh ${row.en}`; thumb.src = await imageUrl(image); tr.children[4].append(thumb); }
@@ -105,13 +114,13 @@
   });
 
   function config() { return { columns: Math.max(1, Math.min(8, Number($('columns').value) || 6)), rows: Math.max(1, Math.min(12, Number($('rows').value) || 7)), sets: Math.max(1, Math.min(100, Number($('sets').value) || 1)), size: $('page-size').value }; }
-  function validRows() { return state.rows.filter((item) => state.images.has(normalImageName(item.imageId))); }
+  function validRows() { return state.rows.filter((item) => state.images.has(numericImageId(item.imageId))); }
   function mm(value) { return value * 72 / 25.4; }
   function pageDimensions(size) { return size === 'A4' ? [mm(210), mm(297)] : [mm(210), mm(148)]; }
   async function previewAll() {
     if (!state.checked) return; const options = config(); const items = validRows(); const capacity = options.columns * options.rows; const pages = Math.ceil(items.length * options.sets / capacity);
     canvasPages.replaceChildren(); previewStatus.textContent = `Đang vẽ ${pages} trang, tổng ${items.length * options.sets} thẻ…`;
-    const imageCache = new Map(); for (const item of items) imageCache.set(item.imageId, await imageUrl(state.images.get(normalImageName(item.imageId))));
+    const imageCache = new Map(); for (const item of items) imageCache.set(item.imageId, await imageUrl(state.images.get(numericImageId(item.imageId))));
     const renderW = 1000; const [pdfW, pdfH] = pageDimensions(options.size); const renderH = Math.round(renderW * pdfH / pdfW);
     for (let pageNo = 0; pageNo < pages; pageNo += 1) {
       const label = document.createElement('p'); label.className = 'canvas-label'; label.textContent = `Trang ${pageNo + 1}/${pages}`; const canvas = document.createElement('canvas'); canvas.className = 'canvas-page'; canvas.width = renderW; canvas.height = renderH; const ctx = canvas.getContext('2d'); ctx.fillStyle = '#fffdf9'; ctx.fillRect(0, 0, renderW, renderH);
@@ -128,7 +137,21 @@
   }
   $('pdf-preview-button').addEventListener('click', () => previewAll().catch((error) => { console.error(error); previewStatus.textContent = `Không vẽ được preview: ${error.message}`; }));
 
-  async function loadImage(pdfDoc, imageInfo) { const data = await imageInfo.entry.async('uint8array'); return imageInfo.type === 'image/png' ? pdfDoc.embedPng(data) : pdfDoc.embedJpg(data); }
+  async function loadImage(pdfDoc, imageInfo) {
+    const data = await imageInfo.entry.async('uint8array');
+    if (imageInfo.type === 'image/png') return pdfDoc.embedPng(data);
+    if (imageInfo.type === 'image/jpeg') return pdfDoc.embedJpg(data);
+    const sourceUrl = URL.createObjectURL(new Blob([data], { type: imageInfo.type }));
+    try {
+      const image = new Image(); image.src = sourceUrl;
+      await new Promise((resolve, reject) => { image.onload = resolve; image.onerror = () => reject(new Error(`Không chuyển được ảnh ${imageInfo.name} sang PDF.`)); });
+      const canvas = document.createElement('canvas'); canvas.width = image.naturalWidth; canvas.height = image.naturalHeight;
+      canvas.getContext('2d').drawImage(image, 0, 0);
+      const pngBlob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+      if (!pngBlob) throw new Error(`Không chuyển được ảnh ${imageInfo.name} sang PDF.`);
+      return pdfDoc.embedPng(new Uint8Array(await pngBlob.arrayBuffer()));
+    } finally { URL.revokeObjectURL(sourceUrl); }
+  }
   function fit(image, x, y, width, height) { const ratio = Math.min(width / image.width, height / image.height); const w = image.width * ratio; const h = image.height * ratio; return { x: x + (width - w) / 2, y: y + (height - h) / 2, width: w, height: h }; }
   async function fetchFont(url) { const response = await fetch(url); if (!response.ok) throw new Error(`Không tải được font: ${url}`); return response.arrayBuffer(); }
   async function exportPdf() {
@@ -136,7 +159,7 @@
     const total = valid.length * options.sets; const pageCount = Math.ceil(total / capacity); exportButton.disabled = true;
     try {
       setProgress('Đang nhúng font và ảnh vào PDF…'); const { PDFDocument, rgb } = PDFLib; const pdfDoc = await PDFDocument.create(); pdfDoc.registerFontkit(fontkit); const font = await pdfDoc.embedFont(await fetchFont('assets/fonts/KGPrimaryPenmanshipAlt.ttf'), { subset: true }); const [pageW, pageH] = pageDimensions(options.size); const margin = mm(5); const cardW = (pageW - margin * 2) / options.columns; const cardH = (pageH - margin * 2) / options.rows; const imageCache = new Map();
-      for (let pageNo = 0; pageNo < pageCount; pageNo += 1) { const page = pdfDoc.addPage([pageW, pageH]); for (let cell = 0; cell < capacity; cell += 1) { const global = pageNo * capacity + cell; if (global >= total) break; const item = valid[global % valid.length]; const col = Math.floor(cell / options.rows); const row = cell % options.rows; const x = margin + col * cardW; const top = pageH - margin - row * cardH; const y = top - cardH; page.drawRectangle({ x, y, width: cardW, height: cardH, color: rgb(.973, .984, 1), borderColor: rgb(.78, .90, .98), borderWidth: .65 }); let size = Math.min(cardH * .20, 16); while (font.widthOfTextAtSize(item.en, size) > cardW - 7 && size > 5) size -= .4; const labelW = font.widthOfTextAtSize(item.en, size); page.drawText(item.en, { x: x + (cardW - labelW) / 2, y: top - size - 3, size, font, color: rgb(0, 0, 0) }); if (!imageCache.has(item.imageId)) imageCache.set(item.imageId, await loadImage(pdfDoc, state.images.get(normalImageName(item.imageId)))); page.drawImage(imageCache.get(item.imageId), fit(imageCache.get(item.imageId), x + 3, y + 3, cardW - 6, cardH - size - 12)); } setProgress(`Đã tạo trang ${pageNo + 1}/${pageCount}…`); }
+      for (let pageNo = 0; pageNo < pageCount; pageNo += 1) { const page = pdfDoc.addPage([pageW, pageH]); for (let cell = 0; cell < capacity; cell += 1) { const global = pageNo * capacity + cell; if (global >= total) break; const item = valid[global % valid.length]; const col = Math.floor(cell / options.rows); const row = cell % options.rows; const x = margin + col * cardW; const top = pageH - margin - row * cardH; const y = top - cardH; page.drawRectangle({ x, y, width: cardW, height: cardH, color: rgb(.973, .984, 1), borderColor: rgb(.78, .90, .98), borderWidth: .65 }); let size = Math.min(cardH * .20, 16); while (font.widthOfTextAtSize(item.en, size) > cardW - 7 && size > 5) size -= .4; const labelW = font.widthOfTextAtSize(item.en, size); page.drawText(item.en, { x: x + (cardW - labelW) / 2, y: top - size - 3, size, font, color: rgb(0, 0, 0) }); if (!imageCache.has(item.imageId)) imageCache.set(item.imageId, await loadImage(pdfDoc, state.images.get(numericImageId(item.imageId)))); page.drawImage(imageCache.get(item.imageId), fit(imageCache.get(item.imageId), x + 3, y + 3, cardW - 6, cardH - size - 12)); } setProgress(`Đã tạo trang ${pageNo + 1}/${pageCount}…`); }
       const bytes = await pdfDoc.save(); const url = URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' })); const a = document.createElement('a'); a.href = url; a.download = `The_Hinh_${options.size}_${options.columns}_Cot_${options.rows}_Hinh.pdf`; a.click(); setTimeout(() => URL.revokeObjectURL(url), 500); setProgress(`Đã tải PDF: ${options.sets} bản, ${total} thẻ, ${pageCount} trang.`); setNotice('Tạo PDF xong. Khi in, chọn Actual size / 100% để giữ đúng kích thước.', 'success');
     } catch (error) { console.error(error); setNotice(`Không tạo được PDF: ${error.message}`, 'error'); setProgress(''); } finally { exportButton.disabled = !state.checked; }
   }

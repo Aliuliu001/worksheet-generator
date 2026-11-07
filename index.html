@@ -28,7 +28,7 @@
         </label>
         <label class="file-box" id="zip-box" data-input="zip-file">
           <span class="file-icon">🖼️</span>
-          <span><strong>Kéo thả file ZIP ảnh</strong><small>ID_Anh phải khớp tên ảnh, ví dụ 1.png</small></span>
+          <span><strong>Kéo thả file ZIP ảnh</strong><small>Ảnh đặt tên bằng số: 1.jpg, 2.webp…</small></span>
           <input id="zip-file" type="file" accept=".zip" hidden>
         </label>
       </div>
@@ -75,8 +75,8 @@
 
     <section class="card guide">
       <h2>Excel cần như thế nào?</h2>
-      <p>Dòng đầu tiên bắt buộc có 4 tiêu đề: <code>STT</code>, <code>English</code>, <code>Viet</code>, <code>ID_Anh</code>. Cột Viet có thể để trống. Cột ID_Anh ghi đúng tên ảnh trong ZIP, ví dụ <code>1.png</code>.</p>
-      <p>Ảnh có thể nằm trong thư mục con trong ZIP. Các định dạng PNG, JPG, JPEG được hỗ trợ.</p>
+      <p>Dòng đầu tiên bắt buộc có 4 tiêu đề: <code>STT</code>, <code>English</code>, <code>Viet</code>, <code>ID_Anh</code>. Cột Viet có thể để trống. Cột ID_Anh chỉ ghi số, ví dụ <code>60</code>; trang sẽ tự tìm ảnh tên <code>60</code> mà không cần anh ghi đuôi ảnh.</p>
+      <p>Ảnh có thể nằm trong thư mục con trong ZIP. Hỗ trợ PNG, JPG, JPEG, WEBP, GIF và BMP.</p>
     </section>
   </main>
 

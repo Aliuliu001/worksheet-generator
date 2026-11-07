@@ -18,20 +18,20 @@ Bấm **📥 Tải form Excel mẫu** trên trang để có đúng cấu trúc. 
 
 | STT | English | Viet | ID_Anh |
 | ---: | --- | --- | --- |
-| 1 | play with a kitten | chơi với mèo con | 1.png |
-| 2 | drive cars | lái xe | 2.jpg |
+| 1 | play with a kitten | chơi với mèo con | 1 |
+| 2 | drive cars | lái xe | 2 |
 
 - `STT`: số thứ tự duy nhất.
 - `English`: từ/cụm từ in lên thẻ.
 - `Viet`: nghĩa tiếng Việt, có thể để trống.
-- `ID_Anh`: **đúng tên file ảnh** trong ZIP; không bắt buộc giống STT.
+- `ID_Anh`: **chỉ ghi số** (ví dụ `60`), không ghi `.png`, `.jpg` hay phần đuôi khác. Không bắt buộc giống STT.
 
 ## Chuẩn bị ZIP ảnh
 
-- Tên ảnh phải trùng giá trị ở cột `ID_Anh` trong Excel: `1.png`, `apple.jpg`, `picture-03.jpeg`…
+- Tên ảnh phải là đúng số ở cột `ID_Anh`; ứng dụng tự nhận mọi đuôi. Ví dụ: `60.png`, `61.jpg`, `62.webp`, `63.gif` đều hợp lệ.
 - Có thể để ảnh trong thư mục con bên trong ZIP.
 - Ảnh thiếu không làm hỏng cả file, nhưng dòng đó sẽ không được xuất.
-- Ảnh PNG/JPG/JPEG được hỗ trợ.
+- Hỗ trợ PNG, JPG, JPEG, WEBP, GIF và BMP.
 
 ## Font
 
