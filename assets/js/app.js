@@ -3,198 +3,45 @@
   'use strict';
   const $ = (id) => document.getElementById(id);
   const state = { rows: [], images: new Map(), checked: false, urls: [] };
-  const excelInput = $('excel-file');
-  const zipInput = $('zip-file');
-  const fileStatus = $('file-status');
-  const notice = $('notice');
-  const previewWrap = $('preview-wrap');
-  const previewBody = $('preview-body');
-  const exportButton = $('export-button');
-  const progress = $('progress');
-  const previewCard = $('pdf-preview-card');
-  const previewStatus = $('pdf-preview-status');
-  const canvasPages = $('canvas-pages');
-
-  function setNotice(message, type = 'muted') { notice.className = `notice ${type}`; notice.textContent = message; }
-  function setProgress(message = '') { progress.textContent = message; }
+  const excelInput = $('excel-file'); const zipInput = $('zip-file'); const exportButton = $('export-button');
+  const mm = (value) => value * 72 / 25.4; const PAGE = [mm(148), mm(210)]; const COLS = 6; const ROWS = 7; const MARGIN = mm(3);
   function clean(value) { return String(value ?? '').trim(); }
+  function setNotice(message, type = 'muted') { $('notice').className = `notice ${type}`; $('notice').textContent = message; }
+  function setProgress(message = '') { $('progress').textContent = message; }
   function normalizeHeader(value) { return clean(value).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, ''); }
-  function imageType(name) { const ext = name.split('.').pop().toLowerCase(); return ({ jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp', gif: 'image/gif', bmp: 'image/bmp' })[ext] || 'image/*'; }
-  function imageKey(filename) {
-    const stem = clean(filename).split('/').pop().replace(/\.[^.]+$/, '').trim();
-    const number = Number(stem);
-    return Number.isInteger(number) && number > 0 ? String(number) : '';
-  }
-  function numericImageId(value) {
-    const number = Number(clean(value));
-    return Number.isInteger(number) && number > 0 ? String(number) : '';
-  }
-  function describeFile(file, label) { return file ? `${label}: ${file.name} (${(file.size / 1024 / 1024).toFixed(1)} MB)` : `Chưa có ${label}`; }
-  function describeFiles() { return `${describeFile(excelInput.files[0], 'Excel')} · ${describeFile(zipInput.files[0], 'ZIP')}`; }
+  function numericId(value) { const n = Number(clean(value)); return Number.isInteger(n) && n > 0 ? String(n) : ''; }
+  function imageKey(name) { return numericId(clean(name).split('/').pop().replace(/\.[^.]+$/, '')); }
+  function imageType(name) { return ({ jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp', gif: 'image/gif', bmp: 'image/bmp' })[name.split('.').pop().toLowerCase()] || 'image/*'; }
   function clearUrls() { state.urls.forEach(URL.revokeObjectURL); state.urls = []; }
-  function markChanged() {
-    state.checked = false; state.rows = []; state.images = new Map(); clearUrls();
-    exportButton.disabled = true; previewWrap.hidden = true; previewCard.hidden = true; canvasPages.replaceChildren();
-    setNotice('File vừa đổi. Bấm “Kiểm tra file” để đọc lại.', 'muted'); setProgress('');
-  }
-  function assignFile(input, file) {
-    const transfer = new DataTransfer(); transfer.items.add(file); input.files = transfer.files;
-    $(input === excelInput ? 'excel-box' : 'zip-box').classList.add('selected'); fileStatus.textContent = describeFiles(); markChanged();
-  }
-  [[$('excel-box'), excelInput], [$('zip-box'), zipInput]].forEach(([box, input]) => {
-    input.addEventListener('change', () => { box.classList.toggle('selected', !!input.files[0]); fileStatus.textContent = describeFiles(); markChanged(); });
-    ['dragenter', 'dragover'].forEach((eventName) => box.addEventListener(eventName, (event) => { event.preventDefault(); box.classList.add('dragover'); }));
-    ['dragleave', 'drop'].forEach((eventName) => box.addEventListener(eventName, (event) => { event.preventDefault(); box.classList.remove('dragover'); }));
-    box.addEventListener('drop', (event) => { const file = event.dataTransfer.files[0]; if (file) assignFile(input, file); });
-  });
-
-  $('template-button').addEventListener('click', () => {
-    const sheet = XLSX.utils.aoa_to_sheet([['STT', 'English', 'Viet', 'ID_Anh'], [1, 'apple', 'quả táo', 1], [2, 'ice cream', 'kem', 2]]);
-    sheet['!cols'] = [{ wch: 10 }, { wch: 25 }, { wch: 25 }, { wch: 18 }];
-    const book = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(book, sheet, 'Tu_vung'); XLSX.writeFile(book, 'Template_Input.xlsx');
-  });
-
-  async function parseExcel(file) {
-    const book = XLSX.read(await file.arrayBuffer(), { type: 'array' }); const sheet = book.Sheets[book.SheetNames[0]];
-    const values = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' }); if (!values.length) throw new Error('Excel đang trống.');
-    const heads = values[0].map(normalizeHeader);
-    const required = { stt: ['stt'], en: ['english', 'en', 'tienganh'], vi: ['viet', 'vi', 'tiengviet'], imageId: ['idanh', 'imageid', 'anhid'] };
-    const indexes = Object.fromEntries(Object.entries(required).map(([key, names]) => [key, heads.findIndex((head) => names.includes(head))]));
-    const missing = Object.entries(indexes).filter(([, value]) => value < 0).map(([key]) => ({ stt: 'STT', en: 'English', vi: 'Viet', imageId: 'ID_Anh' }[key]));
-    if (missing.length) throw new Error(`Dòng tiêu đề thiếu cột: ${missing.join(', ')}. Hãy tải form Excel mẫu để dùng đúng 4 cột.`);
-    const result = [];
-    values.slice(1).forEach((row, position) => {
-      const id = Number(row[indexes.stt]); const en = clean(row[indexes.en]); const vi = clean(row[indexes.vi]); const imageId = clean(row[indexes.imageId]);
-      if (!clean(row[indexes.stt]) && !en && !vi && !imageId) return;
-      result.push({ id, en, vi, imageId, sourceRow: position + 2 });
-    });
-    return result;
-  }
-  async function parseZip(file) {
-    const zip = await JSZip.loadAsync(await file.arrayBuffer()); const found = new Map(); const ignored = [];
-    for (const [name, entry] of Object.entries(zip.files)) {
-      if (entry.dir) continue;
-      const key = imageKey(name); if (!key) { ignored.push(name); continue; }
-      found.set(key, { name, type: imageType(name), entry });
-    }
-    return { found, ignored };
-  }
-  function validateRows(rows, images) {
-    const errors = []; const warnings = []; const seen = new Set();
-    rows.forEach((row) => {
-      if (!Number.isInteger(row.id) || row.id < 1) errors.push(`Dòng ${row.sourceRow}: STT phải là số nguyên từ 1 trở lên.`);
-      else if (seen.has(row.id)) errors.push(`Dòng ${row.sourceRow}: STT ${row.id} bị trùng.`); else seen.add(row.id);
-      if (!row.en) errors.push(`Dòng ${row.sourceRow}: thiếu English.`); if (!row.imageId) errors.push(`Dòng ${row.sourceRow}: thiếu ID_Anh.`);
-      else if (!images.has(numericImageId(row.imageId))) warnings.push(`Dòng ${row.sourceRow}: ID ảnh “${row.imageId}” không có trong ZIP.`);
-    });
-    if (!rows.length) errors.push('Excel không có dòng từ vựng hợp lệ (dòng tiêu đề không được tính là từ).'); return { errors, warnings };
-  }
-  async function imageUrl(imageInfo) { const blob = await imageInfo.entry.async('blob'); const url = URL.createObjectURL(new Blob([blob], { type: imageInfo.type })); state.urls.push(url); return url; }
-  async function renderImageCell(cell, row, images) {
-    cell.replaceChildren(); const image = images.get(numericImageId(row.imageId));
-    cell.className = image ? 'yes' : 'no';
-    if (!image) { cell.textContent = '✕ Thiếu ảnh'; return; }
-    const thumb = document.createElement('img'); thumb.className = 'thumbnail'; thumb.alt = `Ảnh ${row.en}`; thumb.src = await imageUrl(image); cell.append(thumb);
-  }
-  async function renderPreview(rows, images) {
-    previewBody.replaceChildren();
-    for (const row of rows) {
-      const tr = document.createElement('tr'); tr.innerHTML = `<td>${row.id || '—'}</td><td></td><td></td><td></td><td></td>`;
-      const englishInput = document.createElement('input'); englishInput.className = 'table-text-input'; englishInput.value = row.en; englishInput.setAttribute('aria-label', `English dòng ${row.sourceRow}`);
-      englishInput.addEventListener('input', () => { row.en = englishInput.value.trim(); }); tr.children[1].append(englishInput);
-      const vietInput = document.createElement('input'); vietInput.className = 'table-text-input'; vietInput.value = row.vi; vietInput.setAttribute('aria-label', `Viet dòng ${row.sourceRow}`);
-      vietInput.addEventListener('input', () => { row.vi = vietInput.value.trim(); }); tr.children[2].append(vietInput);
-      const imageIdInput = document.createElement('input'); imageIdInput.className = 'table-text-input'; imageIdInput.value = row.imageId; imageIdInput.inputMode = 'numeric'; imageIdInput.setAttribute('aria-label', `ID ảnh dòng ${row.sourceRow}`);
-      imageIdInput.addEventListener('input', async () => { row.imageId = imageIdInput.value.trim(); await renderImageCell(tr.children[4], row, images); }); tr.children[3].append(imageIdInput);
-      await renderImageCell(tr.children[4], row, images); previewBody.append(tr);
-    }
-    previewWrap.hidden = false;
-  }
-  $('check-button').addEventListener('click', async () => {
-    if (!excelInput.files[0] || !zipInput.files[0]) { setNotice('Anh cần chọn đủ 1 Excel và 1 ZIP ảnh.', 'error'); return; }
-    try {
-      clearUrls(); setProgress('Đang đọc Excel và ZIP…'); const [rows, zip] = await Promise.all([parseExcel(excelInput.files[0]), parseZip(zipInput.files[0])]); const result = validateRows(rows, zip.found);
-      state.rows = rows; state.images = zip.found; state.checked = !result.errors.length; await renderPreview(rows, zip.found); exportButton.disabled = !state.checked; previewCard.hidden = !state.checked;
-      const info = [`Đã đọc ${rows.length} từ (không tính dòng tiêu đề), tìm thấy ${zip.found.size} ảnh.`];
-      if (result.errors.length) info.push(`Không thể tạo PDF: ${result.errors.length} lỗi. ${result.errors.slice(0, 2).join(' ')}`);
-      if (result.warnings.length) info.push(`${result.warnings.length} ảnh còn thiếu — dòng đó không được đưa vào PDF.`); if (zip.ignored.length) info.push(`Bỏ qua ${zip.ignored.length} file không phải ảnh PNG/JPG/JPEG.`);
-      setNotice(info.join(' '), result.errors.length ? 'error' : result.warnings.length ? 'warning' : 'success'); setProgress(state.checked ? 'Dữ liệu hợp lệ. Anh có thể xem trước hoặc tạo PDF.' : 'Sửa lỗi trong Excel rồi chọn lại file.');
-    } catch (error) { console.error(error); setNotice(`Không đọc được file: ${error.message}`, 'error'); setProgress(''); }
-  });
-
-  const COLS_PER_A5 = 6; const CARDS_PER_COL = 7;
-  function validRows() { return state.rows.filter((item) => state.images.has(numericImageId(item.imageId))); }
-  function mm(value) { return value * 72 / 25.4; }
-  function pageDimensions() { return [mm(148), mm(210)]; }
-  function buildPages(items) {
-    const capacity = COLS_PER_A5 * CARDS_PER_COL;
-    if (items.length <= capacity) {
-      const colsPerSet = Math.ceil(items.length / CARDS_PER_COL);
-      const setsPerPage = Math.floor(COLS_PER_A5 / colsPerSet);
-      return [{ placements: Array.from({ length: setsPerPage }, (_, set) => items.map((item, itemIndex) => ({ item, col: set * colsPerSet + Math.floor(itemIndex / CARDS_PER_COL), row: itemIndex % CARDS_PER_COL }))), colsPerSet, setsPerPage }];
-    }
-    const pages = [];
-    for (let offset = 0; offset < items.length; offset += capacity) {
-      const chunk = items.slice(offset, offset + capacity);
-      pages.push({ placements: [chunk.map((item, itemIndex) => ({ item, col: Math.floor(itemIndex / CARDS_PER_COL), row: itemIndex % CARDS_PER_COL }))], colsPerSet: COLS_PER_A5, setsPerPage: 1 });
-    }
-    return pages;
-  }
-  async function previewAll() {
-    if (!state.checked) return; const items = validRows(); const pages = buildPages(items);
-    canvasPages.replaceChildren(); previewStatus.textContent = `Đang vẽ ${pages.length} trang…`;
-    const imageCache = new Map(); for (const item of items) imageCache.set(item.imageId, await imageUrl(state.images.get(numericImageId(item.imageId))));
-    const renderW = 1000; const [pdfW, pdfH] = pageDimensions(); const renderH = Math.round(renderW * pdfH / pdfW);
-    for (let pageNo = 0; pageNo < pages.length; pageNo += 1) {
-      const label = document.createElement('p'); label.className = 'canvas-label'; label.textContent = `Trang ${pageNo + 1}/${pages.length}`; const canvas = document.createElement('canvas'); canvas.className = 'canvas-page'; canvas.width = renderW; canvas.height = renderH; const ctx = canvas.getContext('2d'); ctx.fillStyle = '#fffdf9'; ctx.fillRect(0, 0, renderW, renderH);
-      const margin = 24; const cardW = (renderW - margin * 2) / COLS_PER_A5; const cardH = (renderH - margin * 2) / CARDS_PER_COL;
-      for (const placement of pages[pageNo].placements.flat()) {
-        const { item, col, row } = placement; const x = margin + col * cardW; const y = margin + row * cardH;
-        ctx.fillStyle = '#f8fbff'; ctx.strokeStyle = '#c7e2f8'; ctx.lineWidth = 1; ctx.fillRect(x, y, cardW, cardH); ctx.strokeRect(x, y, cardW, cardH);
-        const labelSlot = Math.max(30, cardH * .23); ctx.fillStyle = '#2d241d'; let fontSize = Math.min(cardH * .2, 20); ctx.font = `${fontSize}px KGPen, sans-serif`; while (ctx.measureText(item.en).width > cardW - 12 && fontSize > 7) { fontSize -= 1; ctx.font = `${fontSize}px KGPen, sans-serif`; } ctx.textAlign = 'center'; ctx.fillText(item.en, x + cardW / 2, y + labelSlot * .68);
-        const image = new Image(); image.src = imageCache.get(item.imageId); await new Promise((resolve, reject) => { image.onload = resolve; image.onerror = () => reject(new Error(`Không đọc được ảnh ${item.imageId}.`)); }); const maxW = cardW - 10; const maxH = cardH - labelSlot - 8; const scale = Math.min(maxW / image.naturalWidth, maxH / image.naturalHeight); const w = image.naturalWidth * scale; const h = image.naturalHeight * scale; ctx.drawImage(image, x + (cardW - w) / 2, y + labelSlot + 3 + (maxH - h) / 2, w, h);
-      }
-      canvasPages.append(label, canvas);
-    }
-    const first = pages[0]; previewStatus.textContent = items.length > 42 ? `Đã hiển thị ${pages.length} trang A5 cho 1 set ${items.length} từ.` : `Đã hiển thị 1 tờ A5: 1 set dùng ${first.colsPerSet} cột; tờ này có ${first.setsPerPage} set.`;
-  }
-  $('pdf-preview-button').addEventListener('click', () => previewAll().catch((error) => { console.error(error); previewStatus.textContent = `Không vẽ được preview: ${error.message}`; }));
-
-  async function loadImage(pdfDoc, imageInfo) {
-    const data = await imageInfo.entry.async('uint8array');
-    if (imageInfo.type === 'image/png') return pdfDoc.embedPng(data);
-    if (imageInfo.type === 'image/jpeg') return pdfDoc.embedJpg(data);
-    const sourceUrl = URL.createObjectURL(new Blob([data], { type: imageInfo.type }));
-    try {
-      const image = new Image(); image.src = sourceUrl;
-      await new Promise((resolve, reject) => { image.onload = resolve; image.onerror = () => reject(new Error(`Không chuyển được ảnh ${imageInfo.name} sang PDF.`)); });
-      const canvas = document.createElement('canvas'); canvas.width = image.naturalWidth; canvas.height = image.naturalHeight;
-      canvas.getContext('2d').drawImage(image, 0, 0);
-      const pngBlob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
-      if (!pngBlob) throw new Error(`Không chuyển được ảnh ${imageInfo.name} sang PDF.`);
-      return pdfDoc.embedPng(new Uint8Array(await pngBlob.arrayBuffer()));
-    } finally { URL.revokeObjectURL(sourceUrl); }
-  }
-  function fit(image, x, y, width, height) { const ratio = Math.min(width / image.width, height / image.height); const w = image.width * ratio; const h = image.height * ratio; return { x: x + (width - w) / 2, y: y + (height - h) / 2, width: w, height: h }; }
-  async function fetchFont(url) { const response = await fetch(url); if (!response.ok) throw new Error(`Không tải được font: ${url}`); return response.arrayBuffer(); }
-  async function exportPdf() {
-    if (!state.checked) return; const valid = validRows(); if (!valid.length) { setNotice('Không có thẻ nào có đủ ảnh để xuất.', 'error'); return; }
-    const layoutPages = buildPages(valid); exportButton.disabled = true;
-    try {
-      setProgress('Đang nhúng font và ảnh vào PDF…'); const { PDFDocument, rgb } = PDFLib; const pdfDoc = await PDFDocument.create(); pdfDoc.registerFontkit(fontkit); const font = await pdfDoc.embedFont(await fetchFont('assets/fonts/KGPrimaryPenmanshipAlt.ttf'), { subset: true }); const [pageW, pageH] = pageDimensions(); const margin = mm(1); const cardW = (pageW - margin * 2) / COLS_PER_A5; const cardH = (pageH - margin * 2) / CARDS_PER_COL; const imageCache = new Map();
-      for (let pageNo = 0; pageNo < layoutPages.length; pageNo += 1) {
-        const page = pdfDoc.addPage([pageW, pageH]);
-        for (const { item, col, row } of layoutPages[pageNo].placements.flat()) {
-          const x = margin + col * cardW; const top = pageH - margin - row * cardH; const y = top - cardH;
-          page.drawRectangle({ x, y, width: cardW, height: cardH, color: rgb(.973, .984, 1), borderColor: rgb(.78, .90, .98), borderWidth: .65 });
-          const labelSlot = Math.max(mm(7), cardH * .23); let size = Math.min(cardH * .20, 16); while (font.widthOfTextAtSize(item.en, size) > cardW - 7 && size > 5) size -= .4; const labelW = font.widthOfTextAtSize(item.en, size); page.drawText(item.en, { x: x + (cardW - labelW) / 2, y: top - labelSlot * .72, size, font, color: rgb(0, 0, 0) });
-          if (!imageCache.has(item.imageId)) imageCache.set(item.imageId, await loadImage(pdfDoc, state.images.get(numericImageId(item.imageId))));
-          page.drawImage(imageCache.get(item.imageId), fit(imageCache.get(item.imageId), x + 3, y + 3, cardW - 6, cardH - labelSlot - 8));
-        }
-        setProgress(`Đã tạo trang ${pageNo + 1}/${layoutPages.length}…`);
-      }
-      const bytes = await pdfDoc.save(); const url = URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' })); const a = document.createElement('a'); a.href = url; a.download = 'The_Hinh_A5_Tu_Dong.pdf'; a.click(); setTimeout(() => URL.revokeObjectURL(url), 500); setProgress(`Đã tải PDF: ${valid.length} từ, ${layoutPages.length} trang A5.`); setNotice('Tạo PDF xong. Khi in, chọn Actual size / 100% để giữ đúng kích thước.', 'success');
-    } catch (error) { console.error(error); setNotice(`Không tạo được PDF: ${error.message}`, 'error'); setProgress(''); } finally { exportButton.disabled = !state.checked; }
-  }
-  exportButton.addEventListener('click', exportPdf);
+  function status() { $('file-status').textContent = `${excelInput.files[0] ? `Excel: ${excelInput.files[0].name}` : 'Chưa có Excel'} · ${zipInput.files[0] ? `ZIP: ${zipInput.files[0].name}` : 'Chưa có ZIP'}`; }
+  function changed() { state.checked = false; state.rows = []; state.images = new Map(); clearUrls(); exportButton.disabled = true; $('preview-wrap').hidden = true; $('pdf-preview-card').hidden = true; $('canvas-pages').replaceChildren(); setNotice('File vừa đổi. Bấm “Kiểm tra file” để đọc lại.'); setProgress(); }
+  function assign(input, file) { const dt = new DataTransfer(); dt.items.add(file); input.files = dt.files; $(input === excelInput ? 'excel-box' : 'zip-box').classList.add('selected'); status(); changed(); }
+  [[ $('excel-box'), excelInput ], [ $('zip-box'), zipInput ]].forEach(([box, input]) => { input.addEventListener('change', () => { box.classList.toggle('selected', !!input.files[0]); status(); changed(); }); ['dragenter', 'dragover'].forEach((n) => box.addEventListener(n, (e) => { e.preventDefault(); box.classList.add('dragover'); })); ['dragleave', 'drop'].forEach((n) => box.addEventListener(n, (e) => { e.preventDefault(); box.classList.remove('dragover'); })); box.addEventListener('drop', (e) => { const file = e.dataTransfer.files[0]; if (file) assign(input, file); }); });
+  $('template-button').addEventListener('click', () => { const sheet = XLSX.utils.aoa_to_sheet([['STT', 'English', 'Viet', 'ID_Anh'], [1, 'apple', 'quả táo', 1], [2, 'ice cream', 'kem', 2]]); sheet['!cols'] = [{ wch: 10 }, { wch: 25 }, { wch: 25 }, { wch: 18 }]; const book = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(book, sheet, 'Tu_vung'); XLSX.writeFile(book, 'Template_Input.xlsx'); });
+  async function parseExcel(file) { const book = XLSX.read(await file.arrayBuffer(), { type: 'array' }); const values = XLSX.utils.sheet_to_json(book.Sheets[book.SheetNames[0]], { header: 1, defval: '' }); if (!values.length) throw new Error('Excel đang trống.'); const h = values[0].map(normalizeHeader); const need = { id: ['stt'], en: ['english', 'en', 'tienganh'], vi: ['viet', 'vi', 'tiengviet'], imageId: ['idanh', 'imageid', 'anhid'] }; const at = Object.fromEntries(Object.entries(need).map(([k, v]) => [k, h.findIndex((x) => v.includes(x))])); const missing = Object.entries(at).filter(([, v]) => v < 0).map(([k]) => ({ id: 'STT', en: 'English', vi: 'Viet', imageId: 'ID_Anh' }[k])); if (missing.length) throw new Error(`Thiếu cột: ${missing.join(', ')}.`); return values.slice(1).map((row, i) => ({ id: Number(row[at.id]), en: clean(row[at.en]), vi: clean(row[at.vi]), imageId: clean(row[at.imageId]), sourceRow: i + 2 })).filter((r) => clean(r.id) || r.en || r.vi || r.imageId); }
+  async function parseZip(file) { const zip = await JSZip.loadAsync(await file.arrayBuffer()); const found = new Map(); Object.entries(zip.files).forEach(([name, entry]) => { if (!entry.dir && imageKey(name)) found.set(imageKey(name), { name, type: imageType(name), entry }); }); return found; }
+  function validate(rows, images) { const errors = []; const warnings = []; const seen = new Set(); rows.forEach((r) => { if (!Number.isInteger(r.id) || r.id < 1 || seen.has(r.id)) errors.push(`Dòng ${r.sourceRow}: STT phải là số nguyên duy nhất.`); seen.add(r.id); if (!r.en) errors.push(`Dòng ${r.sourceRow}: thiếu English.`); if (!r.imageId) errors.push(`Dòng ${r.sourceRow}: thiếu ID_Anh.`); else if (!images.has(numericId(r.imageId))) warnings.push(`Dòng ${r.sourceRow}: thiếu ảnh ID ${r.imageId}.`); }); if (!rows.length) errors.push('Excel không có từ nào.'); return { errors, warnings }; }
+  async function imageUrl(info) { const url = URL.createObjectURL(await info.entry.async('blob')); state.urls.push(url); return url; }
+  async function imageCell(cell, row) { cell.replaceChildren(); const info = state.images.get(numericId(row.imageId)); cell.className = info ? 'yes' : 'no'; if (!info) { cell.textContent = '✕ Thiếu ảnh'; return; } const image = document.createElement('img'); image.className = 'thumbnail'; image.alt = `Ảnh ${row.en}`; image.src = await imageUrl(info); cell.append(image); }
+  async function renderTable() { const body = $('preview-body'); body.replaceChildren(); for (const row of state.rows) { const tr = document.createElement('tr'); tr.innerHTML = `<td>${row.id || '—'}</td><td></td><td></td><td></td><td></td>`; [['en', 1, 'English'], ['vi', 2, 'Viet'], ['imageId', 3, 'ID ảnh']].forEach(([key, col, label]) => { const input = document.createElement('input'); input.className = 'table-text-input'; input.value = row[key]; input.inputMode = key === 'imageId' ? 'numeric' : 'text'; input.setAttribute('aria-label', `${label} dòng ${row.sourceRow}`); input.addEventListener('input', async () => { row[key] = input.value.trim(); if (key === 'imageId') await imageCell(tr.children[4], row); }); tr.children[col].append(input); }); await imageCell(tr.children[4], row); body.append(tr); } $('preview-wrap').hidden = false; }
+  $('check-button').addEventListener('click', async () => { if (!excelInput.files[0] || !zipInput.files[0]) return setNotice('Anh cần chọn đủ 1 Excel và 1 ZIP ảnh.', 'error'); try { clearUrls(); setProgress('Đang đọc Excel và ZIP…'); const [rows, images] = await Promise.all([parseExcel(excelInput.files[0]), parseZip(zipInput.files[0])]); const result = validate(rows, images); state.rows = rows; state.images = images; state.checked = !result.errors.length; await renderTable(); exportButton.disabled = !state.checked; $('pdf-preview-card').hidden = !state.checked; setNotice(`Đã đọc ${rows.length} từ, tìm thấy ${images.size} ảnh.${result.errors.length ? ` ${result.errors.slice(0, 2).join(' ')}` : ''}${result.warnings.length ? ` ${result.warnings.length} ảnh thiếu sẽ không được đưa vào PDF.` : ''}`, result.errors.length ? 'error' : result.warnings.length ? 'warning' : 'success'); setProgress(state.checked ? 'Dữ liệu hợp lệ. Chọn dạng phiếu rồi tạo PDF.' : 'Sửa lỗi trong Excel rồi chọn lại file.'); } catch (e) { console.error(e); setNotice(`Không đọc được file: ${e.message}`, 'error'); setProgress(); } });
+  function validRows() { return state.rows.filter((r) => state.images.has(numericId(r.imageId))); }
+  function shuffled(items) { const copy = [...items]; for (let i = copy.length - 1; i > 0; i -= 1) { const j = Math.floor(Math.random() * (i + 1)); [copy[i], copy[j]] = [copy[j], copy[i]]; } return copy; }
+  function scramble(text) { return text.split(/(\s+)/).map((part) => { if (/^\s+$/.test(part) || part.length < 2) return part; const chars = part.split(''); let result = chars.join(''); for (let tries = 0; result === part && tries < 6; tries += 1) result = shuffled(chars).join(''); return result; }).join(' '); }
+  async function fontFor(doc) { doc.registerFontkit(fontkit); return doc.embedFont(await (await fetch('assets/fonts/KGPrimaryPenmanshipAlt.ttf')).arrayBuffer(), { subset: true }); }
+  async function loadImage(doc, info) { const data = await info.entry.async('uint8array'); if (info.type === 'image/png') return doc.embedPng(data); if (info.type === 'image/jpeg') return doc.embedJpg(data); const url = URL.createObjectURL(new Blob([data], { type: info.type })); try { const img = new Image(); img.src = url; await new Promise((ok, no) => { img.onload = ok; img.onerror = no; }); const canvas = document.createElement('canvas'); canvas.width = img.naturalWidth; canvas.height = img.naturalHeight; canvas.getContext('2d').drawImage(img, 0, 0); const blob = await new Promise((ok) => canvas.toBlob(ok, 'image/png')); return doc.embedPng(new Uint8Array(await blob.arrayBuffer())); } finally { URL.revokeObjectURL(url); } }
+  function fit(image, x, y, width, height) { const r = Math.min(width / image.width, height / image.height); const w = image.width * r; const h = image.height * r; return { x: x + (width - w) / 2, y: y + (height - h) / 2, width: w, height: h }; }
+  function drawCentered(page, text, x, y, width, size, font, color) { let s = size; while (font.widthOfTextAtSize(text, s) > width && s > 5) s -= .4; page.drawText(text, { x: x + (width - font.widthOfTextAtSize(text, s)) / 2, y, size: s, font, color }); }
+  function flashPages(items) { const capacity = COLS * ROWS; if (items.length <= capacity) { const colsPerSet = Math.ceil(items.length / ROWS); const count = Math.floor(COLS / colsPerSet); return [Array.from({ length: count }, (_, set) => items.map((item, i) => ({ item, col: set * colsPerSet + Math.floor(i / ROWS), row: i % ROWS })))]; } const pages = []; for (let start = 0; start < items.length; start += capacity) pages.push([items.slice(start, start + capacity).map((item, i) => ({ item, col: Math.floor(i / ROWS), row: i % ROWS }))]); return pages; }
+  async function makeFlashcards(items) { const { PDFDocument, rgb } = PDFLib; const doc = await PDFDocument.create(); const font = await fontFor(doc); const cache = new Map(); const cw = (PAGE[0] - MARGIN * 2) / COLS; const ch = (PAGE[1] - MARGIN * 2) / ROWS; for (const groups of flashPages(items)) { const page = doc.addPage(PAGE); for (const { item, col, row } of groups.flat()) { const x = MARGIN + col * cw; const top = PAGE[1] - MARGIN - row * ch; const y = top - ch; page.drawRectangle({ x, y, width: cw, height: ch, color: rgb(.973, .984, 1), borderColor: rgb(.78, .90, .98), borderWidth: .65 }); const slot = Math.max(mm(7), ch * .23); drawCentered(page, item.en, x + 3, top - slot * .72, cw - 6, Math.min(ch * .2, 16), font, rgb(0, 0, 0)); if (!cache.has(item.imageId)) cache.set(item.imageId, await loadImage(doc, state.images.get(numericId(item.imageId)))); page.drawImage(cache.get(item.imageId), fit(cache.get(item.imageId), x + 3, y + 3, cw - 6, ch - slot - 8)); } } return doc.save(); }
+  function heading(page, title, pageNo, font, rgb) { page.drawText(title, { x: MARGIN, y: PAGE[1] - MARGIN - 16, size: 16, font, color: rgb(.36, .29, .23) }); page.drawText(`Trang ${pageNo}`, { x: PAGE[0] - MARGIN - 42, y: PAGE[1] - MARGIN - 14, size: 8, font, color: rgb(.35, .35, .35) }); }
+  async function makePractice(items, type, viToEn) { const { PDFDocument, rgb } = PDFLib; const doc = await PDFDocument.create(); const font = await fontFor(doc); const cache = new Map(); const perPage = 5; for (let start = 0, pageNo = 1; start < items.length; start += perPage, pageNo += 1) { const page = doc.addPage(PAGE); heading(page, type === 'anagram' ? 'Xáo chữ' : 'Nhìn hình viết từ', pageNo, font, rgb); for (const [i, item] of items.slice(start, start + perPage).entries()) { const top = PAGE[1] - MARGIN - 30 - i * mm(34); const imageBox = { x: MARGIN, y: top - mm(27), width: mm(34), height: mm(25) }; if (!cache.has(item.imageId)) cache.set(item.imageId, await loadImage(doc, state.images.get(numericId(item.imageId)))); page.drawRectangle({ ...imageBox, borderColor: rgb(.75, .75, .75), borderWidth: .5 }); page.drawImage(cache.get(item.imageId), fit(cache.get(item.imageId), imageBox.x + 2, imageBox.y + 2, imageBox.width - 4, imageBox.height - 4)); const prompt = viToEn && item.vi ? item.vi : type === 'anagram' ? scramble(item.en) : ''; page.drawText(`${start + i + 1}. ${prompt}`, { x: MARGIN + mm(40), y: top - 10, size: 13, font, color: rgb(0, 0, 0) }); const lineY = top - mm(21); page.drawLine({ start: { x: MARGIN + mm(40), y: lineY }, end: { x: PAGE[0] - MARGIN, y: lineY }, thickness: .7, color: rgb(.45, .45, .45) }); } } return doc.save(); }
+  function matchingTermOrders(items) { const orders = []; for (let start = 0; start < items.length; start += 6) orders.push(shuffled(items.slice(start, start + 6))); return orders; }
+  async function makeMatching(items, viToEn, answer, termOrders) { const { PDFDocument, rgb } = PDFLib; const doc = await PDFDocument.create(); const font = await fontFor(doc); const cache = new Map(); const perPage = 6; for (let start = 0, pageNo = 1; start < items.length; start += perPage, pageNo += 1) { const pageItems = items.slice(start, start + perPage); const shuffledTerms = termOrders[pageNo - 1]; const terms = shuffledTerms.map((item, i) => ({ item, letter: String.fromCharCode(65 + i) })); const page = doc.addPage(PAGE); heading(page, answer ? 'Đáp án — Nối hình và từ' : 'Nối hình và từ', pageNo, font, rgb); const answerLines = []; for (let i = 0; i < pageItems.length; i += 1) { const item = pageItems[i]; const top = PAGE[1] - MARGIN - 30 - i * mm(27); if (!cache.has(item.imageId)) cache.set(item.imageId, await loadImage(doc, state.images.get(numericId(item.imageId)))); page.drawText(`${start + i + 1}`, { x: MARGIN, y: top - 10, size: 12, font, color: rgb(0, 0, 0) }); page.drawImage(cache.get(item.imageId), fit(cache.get(item.imageId), MARGIN + 11, top - mm(22), mm(28), mm(21))); if (answer) { const letter = terms.find((t) => t.item === item).letter; page.drawText(`${start + i + 1} — ${letter}: ${viToEn && item.vi ? item.vi : item.en}`, { x: MARGIN + mm(44), y: top - 10, size: 12, font, color: rgb(0, 0, 0) }); } } if (!answer) terms.forEach((term, i) => { const y = PAGE[1] - MARGIN - 40 - i * mm(27); page.drawText(`${term.letter}. ${viToEn && term.item.vi ? term.item.vi : term.item.en}`, { x: MARGIN + mm(80), y, size: 12, font, color: rgb(0, 0, 0) }); }); } return doc.save(); }
+  async function previewAll() { const items = validRows(); if (!items.length) return; $('canvas-pages').replaceChildren(); const pages = flashPages(items); $('pdf-preview-status').textContent = `Đang vẽ ${pages.length} trang…`; const urls = new Map(); for (const i of items) urls.set(i.imageId, await imageUrl(state.images.get(numericId(i.imageId)))); const w = 1000; const h = Math.round(w * PAGE[1] / PAGE[0]); for (let n = 0; n < pages.length; n += 1) { const canvas = document.createElement('canvas'); canvas.className = 'canvas-page'; canvas.width = w; canvas.height = h; const ctx = canvas.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, w, h); const margin = w * 3 / 148; const cw = (w - 2 * margin) / COLS; const ch = (h - 2 * margin) / ROWS; for (const p of pages[n].flat()) { const x = margin + p.col * cw; const y = margin + p.row * ch; ctx.strokeStyle = '#c7e2f8'; ctx.strokeRect(x, y, cw, ch); ctx.textAlign = 'center'; ctx.fillStyle = '#222'; ctx.font = '16px sans-serif'; ctx.fillText(p.item.en, x + cw / 2, y + 24); const im = new Image(); im.src = urls.get(p.item.imageId); await new Promise((ok, no) => { im.onload = ok; im.onerror = no; }); const r = Math.min((cw - 10) / im.naturalWidth, (ch - 38) / im.naturalHeight); ctx.drawImage(im, x + (cw - im.naturalWidth * r) / 2, y + 32 + (ch - 38 - im.naturalHeight * r) / 2, im.naturalWidth * r, im.naturalHeight * r); } const label = document.createElement('p'); label.className = 'canvas-label'; label.textContent = `Trang ${n + 1}/${pages.length}`; $('canvas-pages').append(label, canvas); } $('pdf-preview-status').textContent = `Đã hiển thị ${pages.length} trang thẻ hình A5 (lề 3 mm).`; }
+  $('pdf-preview-button').addEventListener('click', () => previewAll().catch((e) => { console.error(e); $('pdf-preview-status').textContent = `Không vẽ được preview: ${e.message}`; }));
+  function selectedTypes() { return [...document.querySelectorAll('input[name="worksheet"]:checked')].map((input) => input.value); }
+  function download(blob, name) { const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); }
+  async function exportAll() { const items = validRows(); const types = selectedTypes(); const versions = Number($('version-count').value); const viToEn = $('viet-to-english').checked; if (!items.length) return setNotice('Không có từ nào có đủ ảnh để xuất.', 'error'); if (!types.length) return setNotice('Hãy chọn ít nhất một dạng phiếu.', 'error'); exportButton.disabled = true; try { const files = []; const labels = { flashcards: 'The_Hinh_A5', anagram: 'Xao_Chu', matching: 'Noi_Hinh_Tu', typing: 'Nhin_Hinh_Viet_Tu' }; const total = versions * types.length + (types.includes('matching') ? versions : 0); let done = 0; for (let v = 1; v <= versions; v += 1) { const order = versions > 1 ? shuffled(items) : items; for (const type of types) { setProgress(`Đang tạo ${++done}/${total}: ${labels[type]} mã ${v}…`); if (type === 'flashcards') files.push({ name: `${labels[type]}_Ma${v}.pdf`, bytes: await makeFlashcards(order) }); if (type === 'anagram') files.push({ name: `${labels[type]}_Ma${v}.pdf`, bytes: await makePractice(order, 'anagram', viToEn) }); if (type === 'typing') files.push({ name: `${labels[type]}_Ma${v}.pdf`, bytes: await makePractice(order, 'typing', viToEn) }); if (type === 'matching') { const termOrders = matchingTermOrders(order); files.push({ name: `${labels[type]}_Ma${v}.pdf`, bytes: await makeMatching(order, viToEn, false, termOrders) }); setProgress(`Đang tạo ${++done}/${total}: đáp án Matching mã ${v}…`); files.push({ name: `${labels[type]}_DapAn_Ma${v}.pdf`, bytes: await makeMatching(order, viToEn, true, termOrders) }); } } } if (files.length === 1) download(new Blob([files[0].bytes], { type: 'application/pdf' }), files[0].name); else { const zip = new JSZip(); files.forEach((file) => zip.file(file.name, file.bytes)); download(await zip.generateAsync({ type: 'blob' }), 'Phieu_Bai_Tap.zip'); } setProgress(`Đã tải ${files.length === 1 ? 'PDF' : `ZIP gồm ${files.length} PDF`}.`); setNotice('Tạo file xong. Khi in, chọn Actual size / 100%.', 'success'); } catch (e) { console.error(e); setNotice(`Không tạo được PDF: ${e.message}`, 'error'); setProgress(); } finally { exportButton.disabled = !state.checked; } }
+  exportButton.addEventListener('click', exportAll);
 })();

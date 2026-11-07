@@ -1,63 +1,37 @@
-# Danh sách việc — Bộ tạo đề kiểm tra tiếng Anh
+# Danh sách việc — Bộ tạo phiếu bài tập tiếng Anh
 
-**Quy ước:** Chỉ đánh dấu `[x]` sau khi đã chạy thử và kiểm tra kết quả thật.
+**Quy ước:** Chỉ đánh dấu `[x]` cho phần đã có trong bản chạy trên trình duyệt. Kiểm tra máy in/thiết bị thật vẫn để mở.
 
-## Đã chốt cho bản đầu: thẻ hình Colab
+## Nền tảng dữ liệu
 
-- [x] Giữ đúng mục tiêu hiện tại: tạo PDF thẻ hình + chữ để cắt dán vào vở.
-- [x] Khổ mặc định A5, 6 cột × 7 hình.
-- [x] Đã nhận `KGPrimaryPenmanshipAlt.ttf` và `KGPrimaryDots.ttf`; web tự chứa font, không bắt tải lại từng lần.
-- [ ] Khi cần mở rộng: anh duyệt riêng mẫu Matching, Look and Write và Xáo chữ.
-- [ ] Anh gửi một Excel + ZIP ảnh thật 10–20 từ để kiểm tra thêm trước khi dùng đại trà.
-- [ ] Đưa repo `Aliuliu001/worksheet-generator` lên GitHub Pages (đang bị chặn vì PAT trên máy chủ bị GitHub báo hết hiệu lực).
+- [x] Đọc Excel 4 cột và ZIP ảnh trên trình duyệt.
+- [x] Nhận ID ảnh dạng số và các đuôi ảnh phổ biến.
+- [x] Cảnh báo STT lỗi, thiếu English, thiếu ID hoặc thiếu ảnh.
+- [x] Bảng review cho sửa English/Viet/ID_Anh; thumbnail cập nhật theo ID.
+- [x] Thumbnail web cố định 120 × 72 px.
 
-## Đợt 0 — Duyệt bố cục
+## Thẻ hình
 
-- [ ] Kiểm tra file Excel/ZIP mẫu và báo các dòng/ảnh cần sửa nếu có.
-- [ ] Tạo PDF nháp Matching theo ảnh mẫu.
-- [ ] Anh duyệt bố cục PDF nháp: số cặp, vị trí ảnh/từ, khoảng trống nối, lề, cỡ chữ.
+- [x] A5 dọc, 6 cột × 7 hàng, lề 3 mm.
+- [x] Lặp whole-column sets; không lẫn set ở cột thiếu.
+- [x] Giữ vị trí dọc của nhãn dài/ngắn ổn định.
+- [x] Xem trước toàn bộ trang thẻ hình bằng canvas.
 
-## Đợt 1 — Nền tảng tạo đề
+## Phiếu bài tập
 
-- [ ] Tách phần đọc Excel dùng chung.
-- [ ] Tách phần đọc/tìm ảnh trong ZIP dùng chung.
-- [ ] Thêm kiểm tra trùng số, thiếu từ, thiếu ảnh, định dạng file lỗi.
-- [ ] Chuyển phần xáo chữ hiện có thành bộ tạo riêng.
-- [ ] Chạy thử xáo chữ với từ ngắn, từ hai cụm, từ dài, thiếu ảnh và nhiều trang.
-- [ ] Kiểm tra PDF xáo chữ thực tế: đủ câu, đúng ảnh, không tràn/chồng chữ.
+- [x] Thêm UI chọn Flashcards, Anagram, Matching, Typing.
+- [x] Anagram xáo ký tự theo từng từ trong cụm từ và có dòng trả lời.
+- [x] Matching có ảnh trái, từ tiếng Anh được trộn phải, không có từ thừa.
+- [x] Matching tạo PDF đáp án riêng, ghi cặp số–chữ cái.
+- [x] Typing có ảnh và dòng viết.
+- [x] Chọn 1–10 mã đề; mã từ 2 trở lên đổi thứ tự câu.
+- [x] Toggle Việt → English dùng Viet làm gợi ý khi viết/ghép.
+- [x] Một PDF tải trực tiếp; nhiều file xuất ZIP bằng JSZip.
 
-## Đợt 2 — Matching
+## Trải nghiệm và kiểm tra còn lại
 
-- [ ] Tạo logic trộn từ bên phải và lưu đáp án số–chữ cái.
-- [ ] Vẽ trang Matching theo bố cục đã duyệt.
-- [ ] Tạo PDF đáp án Matching riêng.
-- [ ] Thêm lựa chọn 0–3 từ thừa.
-- [ ] Kiểm tra Matching với 1, 6, 10, 11 và 25 từ.
-- [ ] Đối chiếu thủ công ba lần chạy: từng cặp và đáp án đều đúng.
-
-## Đợt 3 — Nhìn hình viết từ và mã đề
-
-- [ ] Tạo trang Look and Write: hình + dòng viết đáp án.
-- [ ] Thêm lựa chọn số mã đề.
-- [ ] Trộn thứ tự câu/đáp án khác nhau theo từng mã.
-- [ ] Đặt tên PDF rõ ràng theo dạng đề và mã đề.
-- [ ] Kiểm tra tạo ba mã đề khác nhau từ cùng dữ liệu.
-
-## Đợt 4 — Web app
-
-- [ ] Tạo trang chọn Excel/ZIP với nút tiếng Việt rõ ràng.
-- [ ] Hiện bảng xem trước dữ liệu và lỗi cần sửa.
-- [ ] Tạo phần chọn dạng đề và cài đặt A4/A5, số câu/trang, mã đề, đáp án.
-- [ ] Chuyển bộ tạo ba dạng sang web app.
-- [ ] Kiểm tra tạo PDF trực tiếp trên Chrome.
-- [ ] Kiểm tra giao diện trên điện thoại/Safari nếu có thiết bị.
-
-## Đợt 5 — GitHub Pages và bàn giao
-
-- [ ] Tạo repo và đưa mã nguồn lên GitHub (không đưa dữ liệu thật).
-- [ ] Bật GitHub Pages.
-- [ ] Kiểm tra link GitHub Pages tạo được PDF thật.
-- [ ] Viết hướng dẫn tiếng Việt, có file Excel và ZIP ví dụ vô danh.
-- [ ] Anh tạo thử ít nhất một đề thật từ link.
-- [ ] Sửa các lỗi anh phản hồi.
-- [ ] Chốt bản đầu và đánh dấu các việc hoàn thành.
+- [x] Trạng thái tiến độ và FAQ ngắn.
+- [ ] Chạy thử bằng Excel/ZIP 10–20 từ trên Chrome và kiểm PDF đã tải.
+- [ ] In thử Actual size / 100% trên máy in thật.
+- [ ] Kiểm tra Safari/điện thoại.
+- [ ] GitHub Pages (chưa làm vì không có xác thực GitHub hợp lệ).
