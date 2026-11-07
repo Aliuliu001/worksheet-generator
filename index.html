@@ -4,28 +4,31 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#5c4a3a">
-  <title>Tạo thẻ hình để dán vở</title>
-  <link rel="stylesheet" href="assets/css/style.css?v=1">
+  <title>Bộ tạo phiếu bài tập tiếng Anh</title>
+  <link rel="stylesheet" href="assets/css/style.css?v=3">
 </head>
 <body>
   <main class="page-shell">
     <header>
-      <p class="eyebrow">BỘ TẠO THẺ HÌNH</p>
+      <p class="eyebrow">BỘ TẠO PHIẾU BÀI TẬP</p>
       <h1>Tạo thẻ hình để cắt dán vào vở</h1>
-      <p class="intro">Chọn 1 Excel và 1 ZIP ảnh. Trang này tự tạo PDF A5 gồm 6 cột × 7 hình — không tải dữ liệu của anh lên đâu cả.</p>
+      <p class="intro">Chọn 1 Excel và 1 ZIP ảnh. Mọi xử lý diễn ra ngay trên trình duyệt; file của anh không được tải lên máy chủ.</p>
     </header>
 
     <section class="card" aria-labelledby="input-title">
-      <h2 id="input-title">1. Chọn 2 file đầu vào</h2>
+      <div class="section-heading">
+        <div><h2 id="input-title">1. Chọn dữ liệu</h2><p>Kéo thả file vào ô tương ứng, hoặc bấm vào ô để chọn file.</p></div>
+        <button class="button secondary" id="template-button" type="button">📥 Tải form Excel mẫu</button>
+      </div>
       <div class="upload-grid">
-        <label class="file-box" id="excel-box">
+        <label class="file-box" id="excel-box" data-input="excel-file">
           <span class="file-icon">📗</span>
-          <span><strong>Chọn file Excel</strong><small>Có 3 cột: STT, tiếng Anh, tiếng Việt</small></span>
+          <span><strong>Kéo thả file Excel</strong><small>4 cột: STT, English, Viet, ID_Anh</small></span>
           <input id="excel-file" type="file" accept=".xlsx,.xls,.csv" hidden>
         </label>
-        <label class="file-box" id="zip-box">
+        <label class="file-box" id="zip-box" data-input="zip-file">
           <span class="file-icon">🖼️</span>
-          <span><strong>Chọn file ZIP chứa ảnh</strong><small>Đặt tên ảnh theo STT: 1.png, 2.jpg…</small></span>
+          <span><strong>Kéo thả file ZIP ảnh</strong><small>ID_Anh phải khớp tên ảnh, ví dụ 1.png</small></span>
           <input id="zip-file" type="file" accept=".zip" hidden>
         </label>
       </div>
@@ -35,45 +38,45 @@
     <section class="card" aria-labelledby="setup-title">
       <h2 id="setup-title">2. Cài đặt bản in</h2>
       <div class="settings-grid">
-        <label>Khổ giấy
-          <select id="page-size"><option value="A5" selected>A5</option><option value="A4">A4</option></select>
-        </label>
-        <label>Số cột
-          <input id="columns" type="number" min="1" max="8" value="6">
-        </label>
-        <label>Số hình mỗi cột
-          <input id="rows" type="number" min="1" max="12" value="7">
-        </label>
-        <label>Số bộ giống nhau cần in
-          <input id="sets" type="number" min="0" max="100" value="0">
-        </label>
-        <p class="setting-note">Để <strong>0</strong> = tự lấp đầy một trang bằng các bộ nguyên vẹn, giống Colab cũ.</p>
+        <label>Khổ giấy<select id="page-size"><option value="A5" selected>A5</option><option value="A4">A4</option></select></label>
+        <label>Số cột<input id="columns" type="number" min="1" max="8" value="6"></label>
+        <label>Số hình mỗi cột<input id="rows" type="number" min="1" max="12" value="7"></label>
+        <label>Số bản in giống nhau<input id="sets" type="number" min="1" max="100" value="1"></label>
       </div>
-      <p class="hint">Với 6 cột × 7 hình: 1 bộ có tối đa 42 từ. Nếu ít hơn, các ô cuối sẽ để trống.</p>
+      <p class="hint">Bản in là số lần lặp lại cùng một bộ thẻ. Mỗi trang có số cột × số hình mỗi cột.</p>
     </section>
 
     <section class="card" aria-labelledby="check-title">
       <div class="section-heading">
-        <div><h2 id="check-title">3. Kiểm tra dữ liệu</h2><p>Đọc Excel và ZIP trước khi tạo file.</p></div>
+        <div><h2 id="check-title">3. Kiểm tra dữ liệu</h2><p>Kiểm tra Excel, ảnh và xem ảnh nhỏ trước khi tạo PDF.</p></div>
         <button class="button secondary" id="check-button" type="button">🔍 Kiểm tra file</button>
       </div>
       <div id="notice" class="notice muted">Chọn đủ Excel và ZIP, sau đó bấm “Kiểm tra file”.</div>
       <div class="table-wrap" id="preview-wrap" hidden>
-        <table><thead><tr><th>STT</th><th>Tiếng Anh</th><th>Ảnh</th></tr></thead><tbody id="preview-body"></tbody></table>
+        <table><thead><tr><th>STT</th><th>English</th><th>Viet</th><th>ID_Anh</th><th>Ảnh xem trước</th></tr></thead><tbody id="preview-body"></tbody></table>
       </div>
     </section>
 
+    <section class="card" id="pdf-preview-card" hidden aria-labelledby="pdf-preview-title">
+      <div class="section-heading">
+        <div><h2 id="pdf-preview-title">4. Xem trước bản in</h2><p>Hiển thị toàn bộ các trang PDF theo đúng số cột và số hình anh đã chọn.</p></div>
+        <button class="button secondary" id="pdf-preview-button" type="button">👁️ Xem toàn bộ PDF</button>
+      </div>
+      <div id="pdf-preview-status" class="file-status"></div>
+      <div class="canvas-pages" id="canvas-pages"></div>
+    </section>
+
     <section class="card action-card" aria-labelledby="export-title">
-      <h2 id="export-title">4. Tạo PDF</h2>
-      <p>PDF dùng font viết tay KG Primary anh gửi. Khi in, chọn <strong>Actual size / 100%</strong>, không chọn “Fit to page”.</p>
+      <h2 id="export-title">5. Tạo PDF</h2>
+      <p>PDF dùng font viết tay KG Primary. Khi in, chọn <strong>Actual size / 100%</strong>, không chọn “Fit to page”.</p>
       <button class="button primary" id="export-button" type="button" disabled>📄 Tạo và tải PDF thẻ hình</button>
       <div class="progress" id="progress" aria-live="polite"></div>
     </section>
 
     <section class="card guide">
       <h2>Excel cần như thế nào?</h2>
-      <p>Trang đọc được cả file không có tiêu đề (cột 1 = tiếng Anh, cột 2 = tiếng Việt, cột 3 = STT) như Colab cũ, hoặc file có tiêu đề <code>stt</code>, <code>en</code>, <code>vi</code>.</p>
-      <p>Ảnh trong ZIP có thể nằm trong thư mục con, miễn tên file là đúng số STT. Ví dụ: <code>1.png</code>, <code>2.jpg</code>.</p>
+      <p>Dòng đầu tiên bắt buộc có 4 tiêu đề: <code>STT</code>, <code>English</code>, <code>Viet</code>, <code>ID_Anh</code>. Cột Viet có thể để trống. Cột ID_Anh ghi đúng tên ảnh trong ZIP, ví dụ <code>1.png</code>.</p>
+      <p>Ảnh có thể nằm trong thư mục con trong ZIP. Các định dạng PNG, JPG, JPEG được hỗ trợ.</p>
     </section>
   </main>
 
@@ -81,6 +84,6 @@
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@pdf-lib/fontkit@1.1.1/dist/fontkit.umd.min.js"></script>
-  <script src="assets/js/app.js?v=2"></script>
+  <script src="assets/js/app.js?v=3"></script>
 </body>
 </html>

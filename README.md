@@ -14,23 +14,23 @@ Trang web này thay cho Colab: chọn **1 file Excel** và **1 file ZIP ảnh**,
 
 ## Chuẩn bị Excel
 
-Ứng dụng đọc hai kiểu dữ liệu:
+Bấm **📥 Tải form Excel mẫu** trên trang để có đúng cấu trúc. Dòng đầu tiên bắt buộc có 4 tiêu đề:
 
-- Có dòng tiêu đề: `stt`, `en`, `vi`.
-- Không có dòng tiêu đề, theo đúng Colab cũ: cột 1 là tiếng Anh, cột 2 là tiếng Việt, cột 3 là STT.
+| STT | English | Viet | ID_Anh |
+| ---: | --- | --- | --- |
+| 1 | play with a kitten | chơi với mèo con | 1.png |
+| 2 | drive cars | lái xe | 2.jpg |
 
-Ví dụ:
-
-| stt | en | vi |
-| --- | --- | --- |
-| 1 | play with a kitten | chơi với mèo con |
-| 2 | drive cars | lái xe |
+- `STT`: số thứ tự duy nhất.
+- `English`: từ/cụm từ in lên thẻ.
+- `Viet`: nghĩa tiếng Việt, có thể để trống.
+- `ID_Anh`: **đúng tên file ảnh** trong ZIP; không bắt buộc giống STT.
 
 ## Chuẩn bị ZIP ảnh
 
-- Mỗi ảnh phải có tên trùng số `stt` trong Excel: `1.png`, `2.jpg`, `3.jpeg`.
+- Tên ảnh phải trùng giá trị ở cột `ID_Anh` trong Excel: `1.png`, `apple.jpg`, `picture-03.jpeg`…
 - Có thể để ảnh trong thư mục con bên trong ZIP.
-- Ảnh thiếu không làm hỏng cả file, nhưng thẻ đó sẽ không được xuất.
+- Ảnh thiếu không làm hỏng cả file, nhưng dòng đó sẽ không được xuất.
 - Ảnh PNG/JPG/JPEG được hỗ trợ.
 
 ## Font
