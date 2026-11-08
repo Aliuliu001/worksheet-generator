@@ -42,21 +42,25 @@ Không dùng chung lưới Flashcards cho bài tập. Mỗi loại có bố cụ
 - 1–7 từ: 6 set/tờ; 8–14: 3 set/tờ; 15–21: 2 set/tờ; 22–42: 1 set/tờ.
 - Set mới luôn bắt đầu tại cột mới; phần trống cuối cột không chứa set khác.
 
-### B. Anagram — đã chốt
+### B. Anagram — điều chỉnh theo mẫu đã duyệt
 
-- A5 dọc, **2 cột**.
-- Mỗi cột tối đa **14 câu**, tức một trang tối đa 28 câu.
-- Mỗi câu: `STT + hình + chữ cái bị xáo + dòng trả lời`.
-- Với cụm từ, xáo từng từ riêng và giữ khoảng trắng giữa các từ.
-- Dùng mẫu Colab/ảnh Anagram anh đã gửi làm chuẩn bố cục.
+- A5 dọc, **2 cột** × tối đa 14 câu/cột (28 câu/trang).
+- Có một đường **nét đứt dọc** ở chính giữa trang để tách/cắt hai cột.
+- Nội dung từng cột nằm sát đường giữa: khoảng cách từ chữ xáo và dòng đáp án tới đường nét đứt chỉ **2–3 mm**, để ưu tiên bề ngang cho học sinh viết đáp án.
+- Mỗi câu: `STT sát hình + hình cao đủ 2 hàng + chữ cái xáo ở hàng 1 + dòng trả lời ở hàng 2`.
+- Tiêu đề tiếng Anh: **Unscramble the Words**.
+- Từ/cụm từ tiếng Anh được xáo từng từ; giữa các từ hiển thị 3 khoảng trống để học sinh nhận ra ranh giới từ.
+- Font mặc định 12pt; từ dài đổi dấu ` / ` sang `/` trước, rồi chỉ giảm tối đa tới 11pt.
 
-### C. Matching — đã chốt
+### C. Matching / Look and Match — điều chỉnh theo mẫu đã duyệt
 
-- A5 dọc, tối đa **11 cặp/trang**, theo ảnh mẫu anh đã gửi.
-- Bên trái: số thứ tự + hình.
-- Bên phải: A, B, C… + đúng các từ tiếng Anh được trộn.
+- Tiêu đề tiếng Anh: **Task 1. Look and match.**
+- A5 dọc, tối đa **11 cặp/trang**.
+- Cột trái mỗi dòng: `1. ______` để học sinh tự điền chữ cái A/B/C… + một dấu tròn lớn + hình.
+- Cột phải mỗi dòng: từ tiếng Anh được trộn, kèm một dấu tròn lớn ở phía gần khu nối.
+- Các dấu tròn ở cả hai phía phải **thẳng hàng theo chiều dọc**, tạo lối nối rõ ràng cho học sinh nhỏ.
+- Khoảng giữa giữ trống hoàn toàn để kẻ đường nối.
 - Không có từ dư.
-- Khoảng giữa dành để học sinh kẻ nối.
 - PDF đáp án riêng theo đúng lượt trộn, ví dụ `1-C, 2-A`.
 
 ### D. Typing dạng 1 — đã chốt
