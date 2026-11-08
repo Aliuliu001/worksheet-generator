@@ -69,16 +69,17 @@ Không dùng chung lưới Flashcards cho bài tập. Mỗi loại có bố cụ
 - Preview cập nhật theo lượt mới; bấm Tạo PDF sẽ dùng đúng lượt đang xem, không tự xáo thêm.
 - Mục tiêu: giáo viên có thể tạo/luyện nhiều lượt mà học sinh không nhớ đáp án cũ.
 
-### E. Matching 2 — đã triển khai và kiểm tra bằng fixture 31 từ
+### E. Matching 2 — đã triển khai và kiểm tra browser/PDF
 
 - Tên trong mục **Chọn phiếu cần tạo**: **Matching 2**.
-- Không kẻ đường nối.
-- Một nhóm gồm 10 hình mang nhãn A–J; phía dưới là đúng 10 từ tiếng Anh trộn thứ tự, học sinh ghi chữ cái tương ứng vào chỗ trống.
+- Không kẻ đường nối. Một nhóm gồm tối đa 10 hình mang nhãn A–J; phía dưới là đúng số từ tiếng Anh tương ứng, học sinh ghi chữ cái vào chỗ trống.
 - Bao nhiêu hình thì có bấy nhiêu từ; **không có từ dư**.
-- Một A5 có 20 hình, gồm 2 nhóm độc lập × 10 hình: Nhóm ảnh 1 + phần Text 1, sau đó Nhóm ảnh 2 + phần Text 2.
-- Mỗi nhóm: hình xếp 5 cột × 2 hàng; phần text 10 câu chia 3 cột theo 4/3/3.
+- Một A5 có tối đa 20 hình, gồm 2 nhóm độc lập × tối đa 10 hình: Nhóm ảnh 1 + Text 1, sau đó Nhóm ảnh 2 + Text 2.
+- Mỗi hình có khung bo tròn riêng để phân cách rõ với hình bên cạnh; nhãn A–J nằm ổn định dưới/tại ảnh.
+- Font của phần text tăng lên **16pt**. Phần text chia 3 cột nhưng dùng các cột có bề rộng cố định và căn trái cùng điểm bắt đầu, không để câu bị lệch trái/phải.
+- Khi một nhóm thiếu hàng thứ hai (ví dụ chỉ 2–5 hình): chỉ vẽ số hàng ảnh thực tế, sau đó đẩy Text của chính nhóm đó sát lên ngay dưới lưới ảnh. Không giữ khoảng trắng giả của hàng ảnh trống.
 - Các nhãn A–J và thứ tự text được xáo riêng trong từng nhóm. Preview, PDF bài làm và PDF đáp án dùng cùng một mapping lưu trong lần mở trang.
-- PDF đáp án riêng; 31 từ tạo 2 PDF (bài làm và đáp án), mỗi PDF có 2 trang (20 + 11 hình).
+- PDF đáp án riêng; Preview phải dùng cùng phép tính chiều cao nhóm động như PDF, không được để khác output.
 
 ### F. Typing dạng 1 — đã chốt
 
