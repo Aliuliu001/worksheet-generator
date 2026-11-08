@@ -22,7 +22,9 @@
 - [x] Thêm UI chọn Flashcards, Anagram, Matching, Typing.
 - [x] Anagram xáo ký tự theo từng từ trong cụm từ và có dòng trả lời.
 - [x] Matching có ảnh trái, từ tiếng Anh được trộn phải, không có từ thừa.
-- [x] Matching tạo PDF đáp án riêng, ghi cặp số–chữ cái.
+- [x] Matching 1 tạo PDF đáp án riêng, ghi cặp số–chữ cái.
+- [x] Matching 2: A5 dọc 20 hình/trang, 2 nhóm độc lập 10 hình (5 × 2), nhãn A–J và 10 prompt 4/3/3; PDF đáp án dùng đúng mapping preview/bài làm.
+- [x] Preview Matching 1 và Matching 2 vẽ ảnh ZIP thật và dùng mapping đã lưu của trang đầu.
 - [x] Typing có ảnh và dòng viết.
 - [x] Chọn 1–10 mã đề; mã từ 2 trở lên đổi thứ tự câu.
 - [x] Toggle Việt → English dùng Viet làm gợi ý khi viết/ghép.

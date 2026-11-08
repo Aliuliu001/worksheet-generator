@@ -52,25 +52,42 @@ Không dùng chung lưới Flashcards cho bài tập. Mỗi loại có bố cụ
 - Từ/cụm từ tiếng Anh được xáo từng từ; giữa các từ hiển thị 3 khoảng trống để học sinh nhận ra ranh giới từ.
 - Font mặc định 12pt; từ dài đổi dấu ` / ` sang `/` trước, rồi chỉ giảm tối đa tới 11pt.
 
-### C. Matching / Look and Match — điều chỉnh theo mẫu đã duyệt
+### C. Matching 1: Look and Match — đã chốt (dạng nối đang làm)
 
 - Tiêu đề tiếng Anh: **Task 1. Look and match.**
-- A5 dọc, tối đa **11 cặp/trang**.
+- A5 dọc, **12 từ/trang**, chia thành 2 bộ × 6 từ; mỗi bộ chỉ xáo trong chính 6 từ đó và có nét đứt ngang ngăn bộ.
 - Cột trái mỗi dòng: `1. ______` để học sinh tự điền chữ cái A/B/C… + một dấu tròn lớn + hình.
 - Cột phải mỗi dòng: từ tiếng Anh được trộn, kèm một dấu tròn lớn ở phía gần khu nối.
-- Các dấu tròn ở cả hai phía phải **thẳng hàng theo chiều dọc**, tạo lối nối rõ ràng cho học sinh nhỏ.
-- Khoảng giữa giữ trống hoàn toàn để kẻ đường nối.
-- Không có từ dư.
-- PDF đáp án riêng theo đúng lượt trộn, ví dụ `1-C, 2-A`.
+- Các dấu tròn ở cả hai phía thẳng hàng theo chiều dọc; khoảng giữa để trống hoàn toàn cho đường nối.
+- Font 15pt, căn trái; toàn bộ nội dung thụt 1 cm từ lề trái.
+- Không có từ dư. PDF đáp án riêng theo đúng lượt trộn, ví dụ `1-C, 2-A`.
 
-### D. Typing dạng 1 — đã chốt
+### D. Nút 🔀 Xáo lại — cần thêm cho mọi dạng
+
+- Nút nằm cạnh phần xem trước, giữ nguyên Excel/ZIP và các ô đã sửa.
+- Mỗi lần bấm tạo một lượt ngẫu nhiên mới: thứ tự câu, chữ xáo Anagram, thứ tự từ Matching 1, nhãn chữ cái Matching 2.
+- Preview cập nhật theo lượt mới; bấm Tạo PDF sẽ dùng đúng lượt đang xem, không tự xáo thêm.
+- Mục tiêu: giáo viên có thể tạo/luyện nhiều lượt mà học sinh không nhớ đáp án cũ.
+
+### E. Matching 2 — đã triển khai và kiểm tra bằng fixture 31 từ
+
+- Tên trong mục **Chọn phiếu cần tạo**: **Matching 2**.
+- Không kẻ đường nối.
+- Một nhóm gồm 10 hình mang nhãn A–J; phía dưới là đúng 10 từ tiếng Anh trộn thứ tự, học sinh ghi chữ cái tương ứng vào chỗ trống.
+- Bao nhiêu hình thì có bấy nhiêu từ; **không có từ dư**.
+- Một A5 có 20 hình, gồm 2 nhóm độc lập × 10 hình: Nhóm ảnh 1 + phần Text 1, sau đó Nhóm ảnh 2 + phần Text 2.
+- Mỗi nhóm: hình xếp 5 cột × 2 hàng; phần text 10 câu chia 3 cột theo 4/3/3.
+- Các nhãn A–J và thứ tự text được xáo riêng trong từng nhóm. Preview, PDF bài làm và PDF đáp án dùng cùng một mapping lưu trong lần mở trang.
+- PDF đáp án riêng; 31 từ tạo 2 PDF (bài làm và đáp án), mỗi PDF có 2 trang (20 + 11 hình).
+
+### F. Typing dạng 1 — đã chốt
 
 - Hình + dòng chấm để học sinh tự viết từ tiếng Anh.
 - A5 dọc chia **2 cột**.
 - Tối đa **15 câu/cột**, tức 30 câu/trang.
 - Hình phải đủ nhận ra; dòng điền nằm cạnh/dưới hình theo bố cục 2 cột.
 
-### E. Typing dạng 2 — đã chốt
+### G. Typing dạng 2 — đã chốt
 
 - Dành cho học sinh lớp lớn: hiển thị **nghĩa tiếng Việt** từ cột `Viet`, học sinh điền English.
 - Không dùng phiên âm và không thêm cột mới vào Excel.
