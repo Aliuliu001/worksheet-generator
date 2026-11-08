@@ -26,11 +26,12 @@
         <label><input type="checkbox" name="worksheet" value="flashcards" checked> Thẻ hình (Flashcards)</label>
         <label><input type="checkbox" name="worksheet" value="anagram"> Xáo chữ (Anagram)</label>
         <label><input type="checkbox" name="worksheet" value="matching"> Nối hình - từ (Matching)</label>
-        <label><input type="checkbox" name="worksheet" value="typing"> Nhìn hình viết từ (Typing)</label>
+        <label><input type="checkbox" name="worksheet" value="typing-image"> Typing: Nhìn hình viết từ</label>
+        <label><input type="checkbox" name="worksheet" value="typing-vietnamese"> Typing: Nghĩa Việt viết English</label>
       </div>
       <div class="settings-grid">
         <label>Số mã đề<select id="version-count"><option value="1">1 mã đề</option><option value="2">2 mã đề</option><option value="3">3 mã đề</option><option value="4">4 mã đề</option><option value="5">5 mã đề</option><option value="6">6 mã đề</option><option value="7">7 mã đề</option><option value="8">8 mã đề</option><option value="9">9 mã đề</option><option value="10">10 mã đề</option></select></label>
-        <label class="toggle-label"><input id="viet-to-english" type="checkbox"> Dùng gợi ý Việt → viết/ghép English</label>
+        <span class="hint">Typing nghĩa Việt luôn dùng cột Viet làm gợi ý và không dùng hình.</span>
       </div>
       <p class="hint">Thẻ hình luôn là A5 dọc 6 cột × 7 hàng; mỗi set lặp theo cột nguyên vẹn. Các phiếu bài tập dùng A5 dọc, tự sang trang khi cần.</p>
     </section>
@@ -42,7 +43,7 @@
     </section>
 
     <section class="card" id="pdf-preview-card" hidden aria-labelledby="pdf-preview-title">
-      <div class="section-heading"><div><h2 id="pdf-preview-title">4. Xem trước thẻ hình</h2><p>Chỉ xem trước bố cục thẻ hình A5; các phiếu khác sẽ được tạo khi tải file.</p></div><button class="button secondary" id="pdf-preview-button" type="button">👁️ Xem toàn bộ thẻ hình</button></div>
+      <div class="section-heading"><div><h2 id="pdf-preview-title">4. Xem trước phiếu đang chọn</h2><p>Xem trang đầu của từng dạng đang chọn; Flashcards hiển thị các trang theo bố cục thẻ hình.</p></div><button class="button secondary" id="pdf-preview-button" type="button">👁️ Xem trước phiếu đang chọn</button></div>
       <div id="pdf-preview-status" class="file-status"></div><div class="canvas-pages" id="canvas-pages"></div>
     </section>
 
@@ -53,5 +54,5 @@
 
     <section class="card guide"><h2>Hướng dẫn nhanh & FAQ</h2><details open><summary>Excel và ảnh cần như thế nào?</summary><p>Dòng đầu tiên có 4 tiêu đề: <code>STT</code>, <code>English</code>, <code>Viet</code>, <code>ID_Anh</code>. ID_Anh chỉ ghi số, ví dụ <code>60</code>; ZIP có thể chứa <code>60.png</code>, <code>60.jpg</code> hoặc định dạng ảnh phổ biến khác.</p></details><details><summary>Vì sao có ZIP thay vì PDF?</summary><p>Một PDF được tải trực tiếp khi chỉ tạo một dạng và một mã đề. Chọn nhiều dạng hoặc nhiều mã đề sẽ tạo ZIP để không bỏ sót file nào.</p></details><details><summary>Matching có từ thừa không?</summary><p>Không. Cột từ tiếng Anh bên phải có đúng số từ tương ứng với số hình bên trái; PDF đáp án ghi cặp số–chữ cái.</p></details><details><summary>Chỉnh dữ liệu ở đâu?</summary><p>Sửa trực tiếp trong bảng kiểm tra rồi tạo PDF. Các sửa đổi chỉ áp dụng trong lần mở trang này.</p></details></section>
   </main>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script><script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script><script src="https://cdn.jsdelivr.net/npm/@pdf-lib/fontkit@1.1.1/dist/fontkit.umd.min.js"></script><script src="assets/js/app.js?v=4"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script><script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script><script src="https://cdn.jsdelivr.net/npm/@pdf-lib/fontkit@1.1.1/dist/fontkit.umd.min.js"></script><script src="assets/js/app.js?v=5"></script>
 </body></html>

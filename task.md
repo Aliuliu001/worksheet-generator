@@ -31,7 +31,8 @@
 ## Trải nghiệm và kiểm tra còn lại
 
 - [x] Trạng thái tiến độ và FAQ ngắn.
-- [ ] Chạy thử bằng Excel/ZIP 10–20 từ trên Chrome và kiểm PDF đã tải.
+- [x] Chạy thử trên trình duyệt local với fixture Excel/ZIP và kiểm tra PDF tải xuống.
+- [ ] In thử trên máy in/thiết bị thật.
 - [ ] In thử Actual size / 100% trên máy in thật.
 - [ ] Kiểm tra Safari/điện thoại.
 - [ ] GitHub Pages (chưa làm vì không có xác thực GitHub hợp lệ).
