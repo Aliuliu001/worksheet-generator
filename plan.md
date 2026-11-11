@@ -1,6 +1,75 @@
 # Kế hoạch sửa lỗi và chuẩn hóa đầu ra — Bộ tạo phiếu bài tập
 
-**Trạng thái:** Đã triển khai các bố cục PDF riêng, lọc dòng Excel rỗng theo dữ liệu thô và preview theo dạng phiếu. Còn kiểm tra máy in/thiết bị thật.
+**Trạng thái:** Đã sửa và kiểm tra bằng browser fixture 20 từ: Preview và PDF dùng cùng quy tắc bố cục, tạo thành công ZIP gồm PDF bài làm và đáp án. Đã đối chiếu trực quan Preview; chưa in thử trên máy in thật.
+
+## Đợt sửa kế tiếp — Matching 2: Preview và file tải xuống giống nhau
+
+**Mục tiêu:** File PDF tải về phải giữ đúng bố cục đẹp như Preview: hình lớn, từng hình có khung nét đứt bo tròn, nhãn chữ cái nằm dưới hình rõ ràng, và text không chồng hay chạy sang cột kế bên.
+
+### Hiện trạng đã xác nhận từ mã nguồn
+
+- Preview web và PDF hiện dùng **hai đoạn vẽ riêng**. Vì vậy cùng một dữ liệu nhưng kích thước ảnh, khung, nhãn và chữ có thể lệch nhau.
+- PDF đang dùng ô hình cao khoảng 19 mm, phần ảnh chỉ khoảng 12.2 mm; do đó hình tải về nhỏ hơn mong muốn.
+- PDF đang đặt nhãn A–J *bên trong đáy* ô hình, nên dễ đè lên ảnh.
+- Phần prompt hiện in thẳng cỡ 16 pt, không đo độ dài trước; cụm từ dài có thể tràn sang cột bên cạnh.
+
+### Bước 1 — Tạo một bản bố cục chung
+
+1. Tạo một “bản tọa độ” chung cho Matching 2: vị trí từng ô hình, khoảng cách 2 mm, vùng ảnh, vùng nhãn A–J, và ba cột text.
+2. Cả Preview web và PDF chỉ đọc bản tọa độ này; không tự tính riêng ở hai nơi nữa.
+3. Giữ nguyên mapping/xáo chữ cái A–J đang dùng để Preview, phiếu học sinh và đáp án luôn khớp nhau.
+
+**Kết quả cần thấy:** Cùng một đề, Preview và PDF có cùng số hàng, đúng vị trí ảnh, đúng nhãn và cùng thứ tự từ.
+
+### Bước 2 — Sửa lưới hình và nhãn chữ cái
+
+1. Tăng vùng chứa ảnh trong từng ô, ưu tiên hình nhìn rõ trên A5.
+2. Mỗi hình nằm trong một **khung nét đứt bo tròn**; khoảng trống giữa hai khung là **2 mm**.
+3. Chừa một dải nhãn cố định *bên dưới ảnh*, tách khỏi vùng hình; nhãn A–J cỡ **16 pt, in đậm**, căn giữa.
+4. Ảnh tự thu/phóng theo tỉ lệ để không bị méo hoặc đụng khung.
+5. Áp dụng cùng màu, độ dày nét đứt, bán kính bo góc ở Preview lẫn PDF.
+
+**Kết quả cần thấy:** Không có chữ A/B/C nào chồng lên hình; hình lớn hơn rõ rệt nhưng vẫn đủ 10 hình/nhóm.
+
+### Bước 3 — Chống chồng text dài giữa 3 cột
+
+1. Xác định chiều rộng cố định của từng cột text, kèm khoảng an toàn trước cột kế tiếp.
+2. Trước khi in mỗi dòng, đo cả chuỗi `số + chỗ trống + từ/cụm từ`.
+3. Mặc định dùng font 16 pt; chỉ khi vượt bề rộng cột mới giảm dần font đến mức nhỏ nhất đọc được.
+4. Nếu vẫn quá dài ở cỡ nhỏ nhất, cắt gọn có dấu `…` trong *chính cột đó*, tuyệt đối không xuống dòng và không chạy sang cột kế.
+5. Dùng đúng hàm đo/thu nhỏ này cho Preview, PDF bài làm và PDF đáp án.
+
+**Kết quả cần thấy:** Các cụm dài như `play with a kitten` vẫn nằm gọn một dòng trong cột của nó; không đè lên cột bên cạnh, không tự wrap.
+
+### Bước 4 — Đồng nhất tiêu đề, đáp án và khoảng cách nhóm
+
+1. Dùng cùng quy tắc đặt tiêu đề, khoảng cách lưới–text và đường nét đứt chia hai nhóm trên cả hai đầu ra.
+2. PDF đáp án giữ bố cục hình giống phiếu học sinh; chỉ thay chỗ trống bằng chữ cái đáp án.
+3. Khi nhóm chỉ có 1 hàng hình, tính chiều cao thật rồi đẩy phần text lên sát phía dưới, không để khoảng trắng giả.
+
+### Bước 5 — Kiểm tra bằng file thật trước khi đẩy web
+
+1. Dùng đúng bộ Excel/ZIP có 10 từ trong ảnh mẫu, gồm các cụm ngắn và cụm dài.
+2. Mở Preview web, lưu ảnh đối chiếu và xuất PDF thật.
+3. Render trang PDF vừa xuất thành ảnh, so sánh trực tiếp với Preview theo các điểm: 10 khung, khoảng cách 2 mm, nhãn 16 pt đậm nằm dưới hình, 10 dòng text không chồng.
+4. Kiểm tra thêm các mốc: 1–5 hình, 6–10 hình, 11–20 hình, và 21 hình để chắc trang/nhóm sau không bị vỡ.
+5. Chỉ khi toàn bộ điều kiện đạt mới commit, đẩy GitHub Pages, tăng số phiên bản link và báo anh tải lại trang bằng **Ctrl + Shift + R**.
+
+### Tệp dự kiến sửa
+
+- `assets/js/app.js` — gom quy tắc bố cục Matching 2, vẽ Preview/PDF bằng chung tọa độ, thêm co chữ theo bề rộng cột.
+- `plan.md` — ghi kết quả kiểm tra thực tế sau khi hoàn tất.
+
+### Điều kiện nghiệm thu
+
+- [ ] Mỗi hình có khung **nét đứt bo tròn**, cách nhau 2 mm.
+- [ ] Hình trong PDF lớn, rõ; không méo.
+- [ ] Nhãn A–J **16 pt, đậm**, nằm dưới hình và không chồng lên ảnh.
+- [ ] Text mặc định 16 pt; text dài tự nhỏ vừa đủ trong cột, không wrap/chồng cột.
+- [ ] Preview web, PDF bài làm và PDF đáp án cùng mapping và cùng bố cục.
+- [ ] Đã kiểm tra PDF xuất thật, không chỉ kiểm tra code/Preview.
+
+---
 
 ## Lỗi cần sửa trước
 

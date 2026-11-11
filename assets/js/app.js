@@ -42,48 +42,52 @@
   async function makeAnagram(items) { const { PDFDocument, rgb } = PDFLib; const doc = await PDFDocument.create(); const font = await fontFor(doc); const cache = new Map(); for (let start = 0, pageNo = 1; start < items.length; start += 28, pageNo += 1) { const page = doc.addPage(PAGE); heading(page, 'Unscramble the Words', pageNo, font, rgb); const itemH = (PAGE[1] - 2 * MARGIN - 22) / 14; const dividerX = PAGE[0] / 2; const gap = mm(2.5); const colW = (PAGE[0] - 2 * MARGIN - mm(4)) / 2; for (let dashY = MARGIN; dashY < PAGE[1] - MARGIN; dashY += mm(3)) page.drawLine({ start: { x: dividerX, y: dashY }, end: { x: dividerX, y: Math.min(dashY + mm(1.5), PAGE[1] - MARGIN) }, thickness: .45, color: rgb(.62, .62, .62) }); for (const [i, item] of items.slice(start, start + 28).entries()) { const col = Math.floor(i / 14); const row = i % 14; const x = MARGIN + col * (colW + mm(4)); const top = PAGE[1] - MARGIN - 22 - row * itemH; const y = top - itemH; const image = await cachedImage(doc, cache, item); const imageW = mm(15); const numberX = col === 0 ? x + mm(1) : x + colW - mm(7); const imageX = col === 0 ? x + mm(4) : x + colW - mm(20); const textX = col === 0 ? x + mm(20) : x + gap; const textW = col === 0 ? dividerX - gap - textX : imageX - mm(2) - textX; page.drawText(`${start + i + 1}.`, { x: numberX, y: top - 8, size: 7, font }); page.drawImage(image, fit(image, imageX, y + 2, imageW, itemH - 4)); drawAnagramText(page, item.en, textX, top - itemH * .36, textW, font, rgb(0, 0, 0)); const lineY = y + itemH * .22; page.drawLine({ start: { x: textX, y: lineY }, end: { x: textX + textW, y: lineY }, thickness: .45, color: rgb(.4, .4, .4) }); } } return doc.save(); }
   function itemsKey(items) { return items.map((item) => `${item.id}:${item.imageId}`).join('|'); }
   function matchingTermOrders(items) { const orders = []; for (let start = 0; start < items.length; start += 12) { const pageItems = items.slice(start, start + 12); orders.push([shuffled(pageItems.slice(0, 6)), shuffled(pageItems.slice(6, 12))]); } return orders; }
+  const MATCHING2_LAYOUT = { cardGap: mm(2), cardHeight: mm(22), cardPadding: mm(1.2), imageHeight: mm(15), labelHeight: mm(4), letterSize: 16, letterBold: true, promptSize: 16, promptMinSize: 9, promptRowHeight: mm(8) };
   function matching2Plan(items) {
     const pages = [];
     for (let start = 0; start < items.length; start += 20) {
-      const pageItems = items.slice(start, start + 20);
-      const groups = [];
-      let top = mm(18);
+      const pageItems = items.slice(start, start + 20); const groups = []; let top = mm(18);
       for (let groupNo = 0; groupNo < 2; groupNo += 1) {
-        const pictures = shuffled(pageItems.slice(groupNo * 10, groupNo * 10 + 10));
-        if (!pictures.length) continue;
-        const prompts = shuffled(pictures.slice());
-        const imageRows = Math.ceil(pictures.length / 5);
+        const pictures = shuffled(pageItems.slice(groupNo * 10, groupNo * 10 + 10)); if (!pictures.length) continue;
+        const prompts = shuffled(pictures.slice()); const imageRows = Math.ceil(pictures.length / 5);
         const promptRows = Math.max(...[4, 3, 3].map((count, col) => Math.min(count, Math.max(0, prompts.length - [0, 4, 7][col]))), 0);
-        const geometry = { top, imageRows, promptTop: top + imageRows * mm(19) + mm(2), promptRows, height: imageRows * mm(19) + mm(2) + promptRows * mm(8) };
-        groups.push({ pictures, prompts, geometry });
-        top += geometry.height + mm(4);
+        const imageBlockHeight = imageRows * MATCHING2_LAYOUT.cardHeight + Math.max(0, imageRows - 1) * MATCHING2_LAYOUT.cardGap;
+        const geometry = { top, imageRows, promptTop: top + imageBlockHeight + mm(2), promptRows, height: imageBlockHeight + mm(2) + promptRows * MATCHING2_LAYOUT.promptRowHeight };
+        groups.push({ pictures, prompts, geometry }); top += geometry.height + mm(4);
       }
       pages.push(groups);
     }
     return pages;
   }
   function matchingPlan(type, items, create) { const saved = state.matchingPlans[type]; const key = itemsKey(items); if (saved && saved.key === key) return saved.value; const value = create(items); state.matchingPlans[type] = { key, value }; return value; }
-  function matching2Columns() { const width = (PAGE[0] - MARGIN * 2) / 3; return [0, 1, 2].map((col) => ({ start: MARGIN + col * width, width, count: [4, 3, 3][col] })); }
+  function matching2CardWidth() { return (PAGE[0] - MARGIN * 2 - MATCHING2_LAYOUT.cardGap * 4) / 5; }
+  function matching2Columns() { const gap = mm(2); const width = (PAGE[0] - MARGIN * 2 - gap * 2) / 3; return [0, 1, 2].map((col) => ({ start: MARGIN + col * (width + gap), width, count: [4, 3, 3][col] })); }
   function roundedCardPath(x, y, width, height, radius) { const r = Math.min(radius, width / 2, height / 2); return `M ${x + r} ${y} L ${x + width - r} ${y} C ${x + width - r / 2} ${y} ${x + width} ${y + r / 2} ${x + width} ${y + r} L ${x + width} ${y + height - r} C ${x + width} ${y + height - r / 2} ${x + width - r / 2} ${y + height} ${x + width - r} ${y + height} L ${x + r} ${y + height} C ${x + r / 2} ${y + height} ${x} ${y + height - r / 2} ${x} ${y + height - r} L ${x} ${y + r} C ${x} ${y + r / 2} ${x + r / 2} ${y} ${x + r} ${y} Z`; }
+  function drawDashedRoundedCard(surface, x, y, width, height, radius, scale = 1) {
+    if (typeof surface.drawSvgPath === 'function') return surface.drawSvgPath(roundedCardPath(x, y, width, height, radius), { color: PDFLib.rgb(.985, .99, 1), borderColor: PDFLib.rgb(.35, .55, .72), borderWidth: .7, borderDashArray: [mm(1), mm(1)] });
+    surface.fillStyle = '#fafdff'; surface.strokeStyle = '#598cb8'; surface.lineWidth = 1.5 * scale; surface.setLineDash([mm(1) * scale, mm(1) * scale]); surface.beginPath(); surface.roundRect(x, y, width, height, radius); surface.fill(); surface.stroke(); surface.setLineDash([]);
+  }
+  function fitPromptText(measure, text, width, size = MATCHING2_LAYOUT.promptSize, minSize = MATCHING2_LAYOUT.promptMinSize) {
+    let fittedSize = size; while (fittedSize > minSize && measure(text, fittedSize) > width) fittedSize -= .25;
+    if (measure(text, fittedSize) <= width) return { text, size: fittedSize };
+    let clipped = text; while (clipped.length && measure(`${clipped}...`, fittedSize) > width) clipped = clipped.slice(0, -1);
+    return { text: `${clipped}...`, size: fittedSize };
+  }
   async function makeMatching2(items, answer, plan) {
-    const { PDFDocument, rgb } = PDFLib; const doc = await PDFDocument.create(); const font = await fontFor(doc); const cache = new Map(); const imageW = (PAGE[0] - MARGIN * 2) / 5;
+    const { PDFDocument, rgb, StandardFonts } = PDFLib; const doc = await PDFDocument.create(); const font = await fontFor(doc); const boldFont = await doc.embedFont(StandardFonts.HelveticaBold); const cache = new Map(); const cardW = matching2CardWidth();
     for (let pageNo = 1; pageNo <= plan.length; pageNo += 1) {
-      const page = doc.addPage(PAGE); const groups = plan[pageNo - 1];
-      heading(page, answer ? 'Answer Key — Picture Letter Match' : 'Task 2. Write the picture letter.', pageNo, font, rgb);
+      const page = doc.addPage(PAGE); const groups = plan[pageNo - 1]; heading(page, answer ? 'Answer Key — Picture Letter Match' : 'Task 2. Write the picture letter.', pageNo, font, rgb);
       for (const group of groups) {
         for (let i = 0; i < group.pictures.length; i += 1) {
-          const item = group.pictures[i]; const col = i % 5; const row = Math.floor(i / 5); const top = group.geometry.top + row * mm(19); const x = MARGIN + col * imageW; const y = PAGE[1] - top - mm(19); const image = await cachedImage(doc, cache, item);
-          page.drawSvgPath(roundedCardPath(x, y, imageW - mm(.7), mm(18.2), mm(2)), { color: rgb(.985, .99, 1), borderColor: rgb(.55, .72, .88), borderWidth: .7 });
-          page.drawImage(image, fit(image, x + mm(1.2), y + mm(1.2), imageW - mm(3.1), mm(12.2)));
-          drawCentered(page, String.fromCharCode(65 + i), x, y + mm(1.2), imageW - mm(.7), 10, font, rgb(0, 0, 0));
+          const item = group.pictures[i]; const col = i % 5; const row = Math.floor(i / 5); const top = group.geometry.top + row * (MATCHING2_LAYOUT.cardHeight + MATCHING2_LAYOUT.cardGap); const x = MARGIN + col * (cardW + MATCHING2_LAYOUT.cardGap); const y = PAGE[1] - top - MATCHING2_LAYOUT.cardHeight; const image = await cachedImage(doc, cache, item);
+          drawDashedRoundedCard(page, x, y, cardW, MATCHING2_LAYOUT.cardHeight, mm(2));
+          page.drawImage(image, fit(image, x + MATCHING2_LAYOUT.cardPadding, y + MATCHING2_LAYOUT.labelHeight + MATCHING2_LAYOUT.cardPadding, cardW - MATCHING2_LAYOUT.cardPadding * 2, MATCHING2_LAYOUT.imageHeight));
+          drawCentered(page, String.fromCharCode(65 + i), x, y + mm(.9), cardW, MATCHING2_LAYOUT.letterSize, boldFont, rgb(0, 0, 0));
         }
         let promptIndex = 0;
-        for (const column of matching2Columns()) {
-          for (let row = 0; row < column.count && promptIndex < group.prompts.length; row += 1, promptIndex += 1) {
-            const item = group.prompts[promptIndex]; const letter = String.fromCharCode(65 + group.pictures.indexOf(item)); const y = PAGE[1] - (group.geometry.promptTop + row * mm(8)) - mm(5);
-            const prompt = answer ? `${promptIndex + 1}. ${item.en} — ${letter}` : `${promptIndex + 1}. ____ ${item.en}`;
-            page.drawText(prompt, { x: column.start, y, size: 16, font, color: rgb(0, 0, 0) });
-          }
+        for (const column of matching2Columns()) for (let row = 0; row < column.count && promptIndex < group.prompts.length; row += 1, promptIndex += 1) {
+          const item = group.prompts[promptIndex]; const letter = String.fromCharCode(65 + group.pictures.indexOf(item)); const y = PAGE[1] - (group.geometry.promptTop + row * MATCHING2_LAYOUT.promptRowHeight) - mm(5); const prompt = answer ? `${promptIndex + 1}. ${item.en} — ${letter}` : `${promptIndex + 1}. ____ ${item.en}`;
+          const fitted = fitPromptText((value, size) => font.widthOfTextAtSize(value, size), prompt, column.width); page.drawText(fitted.text, { x: column.start, y, size: fitted.size, font, color: rgb(0, 0, 0) });
         }
       }
       if (groups.length === 2) { const dividerY = PAGE[1] - (groups[0].geometry.top + groups[0].geometry.height + mm(2)); for (let x = MARGIN; x < PAGE[0] - MARGIN; x += mm(3)) page.drawLine({ start: { x, y: dividerY }, end: { x: Math.min(x + mm(1.5), PAGE[0] - MARGIN), y: dividerY }, thickness: .45, color: rgb(.55, .55, .55) }); }
@@ -94,11 +98,20 @@
   async function makeTypingImage(items) { const { PDFDocument, rgb } = PDFLib; const doc = await PDFDocument.create(); const font = await fontFor(doc); const cache = new Map(); for (let start = 0, pageNo = 1; start < items.length; start += 30, pageNo += 1) { const page = doc.addPage(PAGE); heading(page, 'Nhìn hình viết từ', pageNo, font, rgb); const rowH = (PAGE[1] - 2 * MARGIN - 22) / 15; const colW = (PAGE[0] - 2 * MARGIN - mm(4)) / 2; for (const [i, item] of items.slice(start, start + 30).entries()) { const col = Math.floor(i / 15); const row = i % 15; const x = MARGIN + col * (colW + mm(4)); const top = PAGE[1] - MARGIN - 22 - row * rowH; const image = await cachedImage(doc, cache, item); page.drawText(`${start + i + 1}.`, { x, y: top - 8, size: 7, font }); page.drawImage(image, fit(image, x + mm(6), top - rowH + 3, mm(14), rowH - 6)); page.drawLine({ start: { x: x + mm(22), y: top - rowH / 2 }, end: { x: x + colW, y: top - rowH / 2 }, thickness: .5, color: rgb(.4, .4, .4) }); } } return doc.save(); }
   async function makeTypingVietnamese(items) { const { PDFDocument, rgb } = PDFLib; const doc = await PDFDocument.create(); const font = await fontFor(doc); for (let start = 0, pageNo = 1; start < items.length; start += 28, pageNo += 1) { const page = doc.addPage(PAGE); heading(page, 'Nghĩa tiếng Việt — viết English', pageNo, font, rgb); const rowH = (PAGE[1] - 2 * MARGIN - 22) / 14; const colW = (PAGE[0] - 2 * MARGIN - mm(4)) / 2; for (const [i, item] of items.slice(start, start + 28).entries()) { const col = Math.floor(i / 14); const row = i % 14; const x = MARGIN + col * (colW + mm(4)); const top = PAGE[1] - MARGIN - 22 - row * rowH; drawCentered(page, `${start + i + 1}. ${item.vi}`, x, top - 8, colW, 8, font, rgb(0, 0, 0)); page.drawLine({ start: { x, y: top - rowH + 4 }, end: { x: x + colW, y: top - rowH + 4 }, thickness: .5, color: rgb(.4, .4, .4) }); } } return doc.save(); }
   async function drawMatching2Preview(canvas, groups, urls) {
-    canvas.className = 'canvas-page'; canvas.width = 800; canvas.height = Math.round(800 * PAGE[1] / PAGE[0]); const ctx = canvas.getContext('2d'); const scale = canvas.width / PAGE[0]; const imageW = (PAGE[0] - MARGIN * 2) / 5;
+    canvas.className = 'canvas-page'; canvas.width = 800; canvas.height = Math.round(800 * PAGE[1] / PAGE[0]); const ctx = canvas.getContext('2d'); const scale = canvas.width / PAGE[0]; const cardW = matching2CardWidth();
     ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, canvas.width, canvas.height); ctx.fillStyle = '#33281f'; ctx.font = 'bold 22px sans-serif'; ctx.fillText('Task 2. Write the picture letter.', 28, 38);
     for (const group of groups) {
-      for (let i = 0; i < group.pictures.length; i += 1) { const item = group.pictures[i]; const col = i % 5; const row = Math.floor(i / 5); const x = (MARGIN + col * imageW) * scale; const y = (group.geometry.top + row * mm(19)) * scale; const w = (imageW - mm(.7)) * scale; const h = mm(18.2) * scale; ctx.fillStyle = '#fafdff'; ctx.strokeStyle = '#8cb8e0'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.roundRect(x, y, w, h, mm(2) * scale); ctx.fill(); ctx.stroke(); const image = new Image(); image.src = urls.get(item.imageId); await new Promise((resolve, reject) => { image.onload = resolve; image.onerror = reject; }); const ratio = Math.min((w - 12) / image.naturalWidth, (mm(12.2) * scale) / image.naturalHeight); const iw = image.naturalWidth * ratio; const ih = image.naturalHeight * ratio; ctx.drawImage(image, x + (w - iw) / 2, y + 5 + (mm(12.2) * scale - ih) / 2, iw, ih); ctx.fillStyle = '#222'; ctx.font = '14px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(String.fromCharCode(65 + i), x + w / 2, y + h - 5); }
-      let promptIndex = 0; for (const column of matching2Columns()) for (let row = 0; row < column.count && promptIndex < group.prompts.length; row += 1, promptIndex += 1) { const item = group.prompts[promptIndex]; ctx.fillStyle = '#222'; ctx.font = '16px KGPen, sans-serif'; ctx.textAlign = 'left'; ctx.fillText(`${promptIndex + 1}. ____ ${item.en}`, column.start * scale, (group.geometry.promptTop + row * mm(8)) * scale + 17); }
+      for (let i = 0; i < group.pictures.length; i += 1) {
+        const item = group.pictures[i]; const col = i % 5; const row = Math.floor(i / 5); const x = (MARGIN + col * (cardW + MATCHING2_LAYOUT.cardGap)) * scale; const y = (group.geometry.top + row * (MATCHING2_LAYOUT.cardHeight + MATCHING2_LAYOUT.cardGap)) * scale; const w = cardW * scale; const h = MATCHING2_LAYOUT.cardHeight * scale;
+        drawDashedRoundedCard(ctx, x, y, w, h, mm(2) * scale, scale);
+        const image = new Image(); image.src = urls.get(item.imageId); await new Promise((resolve, reject) => { image.onload = resolve; image.onerror = reject; });
+        const slotX = x + MATCHING2_LAYOUT.cardPadding * scale; const slotY = y + MATCHING2_LAYOUT.cardPadding * scale; const slotW = w - MATCHING2_LAYOUT.cardPadding * 2 * scale; const slotH = MATCHING2_LAYOUT.imageHeight * scale; const ratio = Math.min(slotW / image.naturalWidth, slotH / image.naturalHeight); const iw = image.naturalWidth * ratio; const ih = image.naturalHeight * ratio; ctx.drawImage(image, slotX + (slotW - iw) / 2, slotY + (slotH - ih) / 2, iw, ih);
+        ctx.fillStyle = '#222'; ctx.font = `bold ${MATCHING2_LAYOUT.letterSize * scale}px sans-serif`; ctx.textAlign = 'center'; ctx.fillText(String.fromCharCode(65 + i), x + w / 2, y + h - mm(1.1) * scale);
+      }
+      let promptIndex = 0;
+      for (const column of matching2Columns()) for (let row = 0; row < column.count && promptIndex < group.prompts.length; row += 1, promptIndex += 1) {
+        const item = group.prompts[promptIndex]; const prompt = `${promptIndex + 1}. ____ ${item.en}`; const fitted = fitPromptText((value, size) => { ctx.font = `${size * scale}px KGPen, sans-serif`; return ctx.measureText(value).width / scale; }, prompt, column.width); ctx.fillStyle = '#222'; ctx.font = `${fitted.size * scale}px KGPen, sans-serif`; ctx.textAlign = 'left'; ctx.fillText(fitted.text, column.start * scale, (group.geometry.promptTop + row * MATCHING2_LAYOUT.promptRowHeight) * scale + 17);
+      }
     }
     if (groups.length === 2) { const y = (groups[0].geometry.top + groups[0].geometry.height + mm(2)) * scale; ctx.setLineDash([6, 6]); ctx.beginPath(); ctx.moveTo(MARGIN * scale, y); ctx.lineTo((PAGE[0] - MARGIN) * scale, y); ctx.strokeStyle = '#888'; ctx.stroke(); ctx.setLineDash([]); }
   }
