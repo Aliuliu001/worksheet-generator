@@ -1,5 +1,15 @@
 # Kế hoạch sửa lỗi và chuẩn hóa đầu ra — Bộ tạo phiếu bài tập
 
+## Đợt hiện tại — Matching 2 và Typing nhìn hình
+
+- Matching 2: chữ mặc định 15 pt, ba cột text rộng 30% / 30% / 40% (không kể hai khoảng cách an toàn 2 mm). Xếp 7 từ ngắn vào hai cột đầu (4 + 3), ba cụm dài nhất vào cột cuối. Chỉ co chữ nếu vẫn không vừa cột, không chồng cột. Mapping hình/chữ cái không đổi; Preview, bài làm và đáp án dùng cùng danh sách đã lưu.
+- Typing nhìn hình: Preview phải dùng đúng ảnh ZIP, tiêu đề tiếng Anh, chữ 15 pt và cùng tọa độ với PDF. Đổi mật độ từ 30 xuống **20 hình/A5** (10 mỗi cột) để hình rộng 20 mm, cao tối đa một hàng; không kéo hình cao bằng 1,5–2 hàng. Muốn đổi số từ mỗi trang về sau, chỉ sửa `TYPING_IMAGE_PER_COL` ở `assets/js/app.js` (đồng thời kiểm tra Preview/PDF). Giữ tỉ lệ gốc của ảnh và đường viết không chạm hình.
+- Kiểm tra mỗi dạng trong mục “Chọn phiếu cần tạo”: danh sách ảnh đã sửa trong bảng, font, ngôn ngữ đề, số trang Preview, file PDF thật, ảnh không thiếu, vị trí không tràn và đề/đáp án cùng thứ tự. Không đánh dấu hoàn tất cho các dạng khác khi chưa kiểm tra từng dạng.
+- Dữ liệu thử hiện có dùng hình vuông đỏ làm ảnh mẫu, không phải lỗi tải ảnh: cần thử thêm ZIP ảnh thật của anh để xác nhận khả năng nhận diện hình trên giấy.
+- Bước tiếp theo: rà riêng Flashcards, Anagram, Matching 1 và Typing nghĩa Việt bằng dữ liệu thật; chuẩn hóa tiêu đề tiếng Anh và cỡ chữ nơi cần thiết, rồi so Preview với từng PDF. Đợt này không tự đổi bố cục các dạng đã duyệt.
+
+---
+
 **Trạng thái:** Đã sửa và kiểm tra bằng browser fixture 20 từ: Preview và PDF dùng cùng quy tắc bố cục, tạo thành công ZIP gồm PDF bài làm và đáp án. Đã đối chiếu trực quan Preview; chưa in thử trên máy in thật.
 
 ## Đợt sửa kế tiếp — Matching 2: Preview và file tải xuống giống nhau
@@ -145,7 +155,7 @@ Không dùng chung lưới Flashcards cho bài tập. Mỗi loại có bố cụ
 - Bao nhiêu hình thì có bấy nhiêu từ; **không có từ dư**.
 - Một A5 có tối đa 20 hình, gồm 2 nhóm độc lập × tối đa 10 hình: Nhóm ảnh 1 + Text 1, sau đó Nhóm ảnh 2 + Text 2.
 - Mỗi hình có khung bo tròn riêng để phân cách rõ với hình bên cạnh; nhãn A–J nằm ổn định dưới/tại ảnh.
-- Font của phần text tăng lên **16pt**. Phần text chia 3 cột nhưng dùng các cột có bề rộng cố định và căn trái cùng điểm bắt đầu, không để câu bị lệch trái/phải.
+- Font phần text mặc định **15pt**. Ba cột theo tỉ lệ **30% / 30% / 40%**, ngăn nhau 2 mm; từ ngắn ở hai cột đầu, cụm dài ở cột ba. Chỉ thu nhỏ chữ nếu chuỗi thực tế vượt giới hạn cột.
 - Khi một nhóm thiếu hàng thứ hai (ví dụ chỉ 2–5 hình): chỉ vẽ số hàng ảnh thực tế, sau đó đẩy Text của chính nhóm đó sát lên ngay dưới lưới ảnh. Không giữ khoảng trắng giả của hàng ảnh trống.
 - Các nhãn A–J và thứ tự text được xáo riêng trong từng nhóm. Preview, PDF bài làm và PDF đáp án dùng cùng một mapping lưu trong lần mở trang.
 - PDF đáp án riêng; Preview phải dùng cùng phép tính chiều cao nhóm động như PDF, không được để khác output.

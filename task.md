@@ -32,6 +32,15 @@
 - [x] Toggle Việt → English dùng Viet làm gợi ý khi viết/ghép.
 - [x] Một PDF tải trực tiếp; nhiều file xuất ZIP bằng JSZip.
 
+## Đợt Matching 2 + Typing nhìn hình
+
+- [x] Matching 2: font 15 pt, 3 cột 30/30/40, từ dài nhất vào cột ba; dùng chung dữ liệu cho Preview, PDF và đáp án.
+- [x] Typing nhìn hình: Preview dùng ảnh ZIP thật, tiêu đề tiếng Anh, số và tiêu đề 15 pt; 20 hình/A5, mỗi cột 10 hình, ảnh rộng tối đa 20 mm.
+- [x] Chạy mẫu 31 hình trên trình duyệt: Preview hiện 2 trang Matching 2 và 2 trang Typing; ZIP xuất 3 PDF, mỗi PDF 2 trang, số ảnh 20+11.
+- [ ] Thử thêm bằng ZIP ảnh bài học thật (mẫu hiện tại là hình vuông đỏ).
+- [ ] Kiểm tra riêng bốn dạng còn lại: Flashcards, Anagram, Matching 1, Typing nghĩa Việt — ảnh, font, tiếng Anh, Preview so PDF và trang cuối thiếu câu.
+- [ ] In thử phiếu Typing trên giấy A5 để chốt 20 hình/trang có đủ lớn.
+
 ## Trải nghiệm và kiểm tra còn lại
 
 - [x] Trạng thái tiến độ và FAQ ngắn.
