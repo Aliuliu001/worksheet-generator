@@ -41,6 +41,16 @@
 - [ ] Kiểm tra riêng bốn dạng còn lại: Flashcards, Anagram, Matching 1, Typing nghĩa Việt — ảnh, font, tiếng Anh, Preview so PDF và trang cuối thiếu câu.
 - [ ] In thử phiếu Typing trên giấy A5 để chốt 20 hình/trang có đủ lớn.
 
+## Đợt lề 10 mm, Typing 1 và nét đứt đen — 13/11/2026
+
+- [x] Bốn phiếu Matching 1, Matching 2, Typing 1, Typing 2 dùng điểm bắt đầu nội dung trái/trên 10 mm; Flashcards và Anagram vẫn giữ lề cũ.
+- [x] Đổi tên chọn phiếu thành **Typing 1: Nhìn hình viết từ** và **Typing 2: Nghĩa Việt viết English**.
+- [x] Typing 1 thử mức 14 dòng/cột (28 câu/A5): hình bắt đầu 2 mm sau ô số, có khoảng cách với đường viết và không tràn trang.
+- [x] Matching 2: PDF dùng nét đứt đen mảnh vẽ bằng đoạn thẳng PDF thực, không còn phụ thuộc `borderDashArray`; có thêm hai vạch nét đứt dọc giữa ba cột text.
+- [x] Đã nạp fixture thật qua browser: 31 từ/31 ảnh, xem Preview 6 trang và tải ZIP 6 PDF. Dùng PyMuPDF xác nhận A5 148 × 210 mm, đúng phân trang (2/2/2/2/3/3 trang) và render các PDF ra ảnh để kiểm tra trực quan.
+- [x] `node --check` và 2 test Node đều qua.
+- [ ] Thử bằng ZIP ảnh bài học thật (fixture hiện tại là hình đỏ nhân tạo), rồi in 100% trên giấy A5.
+
 ## Trải nghiệm và kiểm tra còn lại
 
 - [x] Trạng thái tiến độ và FAQ ngắn.

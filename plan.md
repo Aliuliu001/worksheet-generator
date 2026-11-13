@@ -10,7 +10,9 @@
 
 ---
 
-**Trạng thái:** Đã sửa và kiểm tra bằng browser fixture 20 từ: Preview và PDF dùng cùng quy tắc bố cục, tạo thành công ZIP gồm PDF bài làm và đáp án. Đã đối chiếu trực quan Preview; chưa in thử trên máy in thật.
+**Trạng thái:** Đã sửa và kiểm tra bằng browser fixture 31 từ: Preview và PDF dùng cùng quy tắc bố cục, tạo thành công ZIP gồm 6 PDF bài làm/đáp án. Đã render PDF thật để đối chiếu trực quan; chưa in thử trên máy in thật.
+
+**Cập nhật 13/11/2026:** Matching 1/2 và Typing 1/2 đã dùng điểm bắt đầu nội dung trái/trên 10 mm. Typing 1 hiện thử 14 dòng/cột (28 câu/A5), ảnh cách ô số 2 mm. Matching 2 PDF đã thay nét SVG bằng các đoạn nét đứt đen mảnh và thêm hai vạch dọc giữa ba cột prompt. `node --check` và hai test Node đều đạt. Cần in thử 100% với ảnh bài học thật để chốt mật độ.
 
 ## Đợt sửa kế tiếp — Matching 2: Preview và file tải xuống giống nhau
 
