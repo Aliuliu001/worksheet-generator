@@ -1,3 +1,4 @@
 .DS_Store
 *.pdf
 examples/rendered/
+verification-output/

@@ -33,6 +33,12 @@ Bấm **📥 Tải form Excel mẫu** trên trang để có đúng cấu trúc. 
 - Ảnh thiếu không làm hỏng cả file, nhưng dòng đó sẽ không được xuất.
 - Hỗ trợ PNG, JPG, JPEG, WEBP, GIF và BMP.
 
+## Lề khi in
+
+- **Matching 1, Matching 2, Typing 1, Typing 2:** lề nội dung trái/trên 10 mm, phải/dưới 5 mm. Riêng prompt dài của Matching 2 có thể sát tới 3,2 mm từ mép phải để không phải cắt chữ.
+- **Flashcards, Anagram:** giữ lề 3 mm theo bố cục cũ.
+- Typing 1 in 28 câu/A5 (14 câu mỗi cột); ảnh cách số 2 mm, sau ảnh là dòng viết thấp hơn tâm ảnh 2 mm.
+
 ## Font
 
 Trang đã chứa sẵn hai font anh cung cấp:

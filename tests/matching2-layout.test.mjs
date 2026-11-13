@@ -11,5 +11,16 @@ assert.match(source, /drawDashedRoundedCard/, 'Preview and PDF need the same das
 assert.match(source, /fitPromptText/, 'Long prompts need one shared shrink-to-fit helper');
 assert.match(source, /fitPromptText\(.*column\.width/s, 'PDF prompt renderer must constrain text to its column');
 assert.match(source, /fitPromptText\(.*column\.width/s, 'Preview prompt renderer must constrain text to its column');
+assert.match(source, /function matching2ActiveDividers\(group\)/, 'Matching 2 must decide dividers from active prompt columns');
+assert.match(source, /matching2ActiveDividers\(group\)/, 'Both renderers must use the same active-divider decision');
 
-console.log('PASS Matching 2 shared layout contract');
+const start = source.indexOf('function matching2ActiveDividers(group)');
+const end = source.indexOf('\n  function drawMatching2ColumnDividers', start);
+assert.ok(start >= 0 && end > start, 'Could not locate the active-divider helper');
+const helperSource = source.slice(start, end).replace('function matching2ActiveDividers', 'return function matching2ActiveDividers');
+const matching2ActiveDividers = new Function(helperSource)();
+for (const count of [1, 4]) assert.deepEqual(matching2ActiveDividers({ prompts: Array(count) }), [], `${count} prompts: no vertical divider`);
+for (const count of [5, 7]) assert.deepEqual(matching2ActiveDividers({ prompts: Array(count) }), [0], `${count} prompts: only first divider`);
+for (const count of [8, 10]) assert.deepEqual(matching2ActiveDividers({ prompts: Array(count) }), [0, 1], `${count} prompts: both dividers`);
+
+console.log('PASS Matching 2 shared layout and active-divider contract');
