@@ -13,8 +13,8 @@ assert.match(source, /function worksheetWidth\(right = WORKSHEET_RIGHT\)/, 'Work
 assert.match(source, /function typing1PictureWriteLayout[\s\S]*worksheetWidth\(\)/, 'Typing 1 must use the shared asymmetric content width');
 assert.match(source, /function typingVietnameseLayout[\s\S]*worksheetWidth\(\)/, 'Typing 2 must use the shared asymmetric content width');
 assert.match(source, /const TYPING1_PICTURE_WRITE_PER_COL\s*=\s*14/, 'Typing 1 must use the approved 14-row layout');
-assert.match(source, /const TYPING1_WRITING_LINE_DROP\s*=\s*mm\(4\)/, 'Typing 1 writing line must visibly drop 4 mm from the old baseline');
-assert.match(source, /const writingLineY\s*=\s*baseline\s*\+\s*mm\(\.7\)\s*-\s*TYPING1_WRITING_LINE_DROP/, 'PDF Typing 1 line must use the shared 4 mm drop');
+assert.match(source, /const TYPING1_WRITING_LINE_DROP\s*=\s*mm\(2\.8\)/, 'Typing 1 line must move upward 1.2 mm from the prior 4 mm drop');
+assert.match(source, /const writingLineY\s*=\s*baseline\s*\+\s*mm\(\.7\)\s*-\s*TYPING1_WRITING_LINE_DROP/, 'PDF Typing 1 line must use the shared 2.8 mm drop');
 assert.match(source, /writingLineY[\s\S]*TYPING1_WRITING_LINE_DROP/, 'Preview Typing 1 line must use the shared layout coordinate');
 assert.match(source, /const imageX = numberW \+ mm\(2\)/, 'Typing 1 image must start 2 mm after the number slot');
 assert.match(source, /function drawDashedLinePdf/, 'PDF must explicitly draw dashed strokes');

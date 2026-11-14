@@ -3,6 +3,10 @@ import fs from 'node:fs';
 
 const source = fs.readFileSync(new URL('../assets/js/app.js', import.meta.url), 'utf8');
 
+assert.match(source, /const MATCHING2_LEFT\s*=\s*mm\(7\)/, 'Matching 2 must begin 7 mm from the left');
+assert.match(source, /const MATCHING2_RIGHT\s*=\s*mm\(3\.2\)/, 'Matching 2 must keep 3.2 mm on the right');
+assert.match(source, /function matching2Width\(\)/, 'Matching 2 must use its own full-width contract');
+assert.match(source, /const widths = \[\.3, \.33, \.37\]/, 'Matching 2 prompt columns must use 30/33/37 widths');
 assert.match(source, /const MATCHING2_LAYOUT\s*=/, 'Matching 2 needs one shared layout contract');
 assert.match(source, /cardGap:\s*mm\(2\)/, 'Matching 2 cards must be spaced 2 mm apart');
 assert.match(source, /letterSize:\s*16/, 'Picture letters must be 16 pt');

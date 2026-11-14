@@ -49,9 +49,9 @@
 - [x] Matching 2: PDF dùng nét đứt đen mảnh vẽ bằng đoạn thẳng PDF thực, không còn phụ thuộc `borderDashArray`; có thêm hai vạch nét đứt dọc giữa ba cột text.
 - [x] Đã nạp fixture thật qua browser: 31 từ/31 ảnh, xem Preview 6 trang và tải ZIP 6 PDF. Dùng PyMuPDF xác nhận A5 148 × 210 mm, đúng phân trang (2/2/2/2/3/3 trang) và render các PDF ra ảnh để kiểm tra trực quan.
 - [x] `node --check` và 2 test Node đều qua.
-- [x] Lề không đối xứng cho Matching 1/2 và Typing 1/2: trái/trên 10 mm, phải/dưới 5 mm; prompt Matching 2 dài mới được sát tới 3,2 mm ở mép phải.
+- [x] Matching 1 và Typing 1/2: lề trái/trên 10 mm, phải/dưới 5 mm. Matching 2: lề trái 7 mm, phải 3,2 mm; vùng rộng thêm được chia đồng thời cho 3 cột 30%/33%/37%.
 - [x] Matching 2: 1–4 prompt không có vạch dọc; 5–7 có một vạch; 8–10 có hai vạch. Preview, PDF bài làm và đáp án dùng chung quy tắc.
-- [x] Typing 1: vẫn 28 câu/A5, ảnh cách số 2 mm, dòng viết hạ 4 mm bằng chung tọa độ cho Preview/PDF.
+- [x] Typing 1: vẫn 28 câu/A5, ảnh cách số 2 mm, dòng viết hạ 2,8 mm bằng chung tọa độ cho Preview/PDF (kéo lên 1,2 mm từ mức trước).
 - [x] Đã nạp fixture 2 từ với ảnh thật qua browser, Preview và PDF thật chỉ còn hai khung A/B nét đứt bo góc; không còn vạch prompt hay vạch ngăn nhóm thừa.
 - [x] Đã nạp fixture ảnh thật Typing 1: PDF 28 câu có đủ 14 dòng/cột, không tràn; 29 câu tự sang trang hai. Dòng viết thấp hơn rõ ràng và không chạm hình/hàng kế.
 - [ ] In thử Actual size / 100% trên giấy A5.
