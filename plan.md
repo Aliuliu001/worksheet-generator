@@ -12,7 +12,7 @@
 
 **Trạng thái:** Đã sửa và kiểm tra bằng browser fixture 31 từ: Preview và PDF dùng cùng quy tắc bố cục, tạo thành công ZIP gồm 6 PDF bài làm/đáp án. Đã render PDF thật để đối chiếu trực quan; chưa in thử trên máy in thật.
 
-**Cập nhật 13/11/2026:** Matching 1/2 và Typing 1/2 dùng lề trái/trên 10 mm, phải/dưới 5 mm. Prompt dài Matching 2 mới được sát tới 3,2 mm từ mép phải. Typing 1 giữ 14 dòng/cột (28 câu/A5), ảnh cách ô số 2 mm và dòng viết hạ 2 mm. Matching 2 giữ khung ảnh nét đứt đen bo góc; vạch dọc theo số prompt: 1–4 không vạch, 5–7 một vạch, 8–10 hai vạch. Đã nạp fixture 31 từ qua browser, Preview 4 trang, tải ZIP PDF thật và render kiểm tra: trang thiếu 1 prompt không có vạch dọc, Typing 1 đủ 28 dòng/trang không tràn. `node --check` và hai test Node đều đạt. Cần in thử 100% với ảnh bài học thật để chốt mật độ.
+**Cập nhật 14/11/2026:** Matching 1/2 và Typing 1/2 dùng lề trái/trên 10 mm, phải/dưới 5 mm. Prompt dài Matching 2 mới được sát tới 3,2 mm từ mép phải. Với Matching 2, 1–4 prompt không có vạch dọc, 5–7 có một vạch, 8–10 có hai vạch. Đã truy và xóa nhánh Preview Matching 2 cũ vốn vẽ nét thừa: fixture 2 từ với ảnh thật đã qua browser và PDF render, chỉ còn hai khung A/B nét đứt bo góc, không có divider hay vạch nhóm. Typing 1 đổi tên **Nhìn hình viết chữ**, giữ 14 dòng/cột (28 câu/A5), ảnh cách số 2 mm; dòng viết hạ 4 mm bằng tọa độ chung Preview/PDF. Fixture ảnh thật xác nhận 28 câu vừa 1 trang, 29 câu sang 2 trang, không chạm/tràn. `node --check` và hai test Node đều đạt. Cần in thử 100% trên giấy A5.
 
 ## Đợt sửa kế tiếp — Matching 2: Preview và file tải xuống giống nhau
 

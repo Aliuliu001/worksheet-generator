@@ -37,7 +37,7 @@ Bấm **📥 Tải form Excel mẫu** trên trang để có đúng cấu trúc. 
 
 - **Matching 1, Matching 2, Typing 1, Typing 2:** lề nội dung trái/trên 10 mm, phải/dưới 5 mm. Riêng prompt dài của Matching 2 có thể sát tới 3,2 mm từ mép phải để không phải cắt chữ.
 - **Flashcards, Anagram:** giữ lề 3 mm theo bố cục cũ.
-- Typing 1 in 28 câu/A5 (14 câu mỗi cột); ảnh cách số 2 mm, sau ảnh là dòng viết thấp hơn tâm ảnh 2 mm.
+- **Typing 1: Nhìn hình viết chữ** in 28 câu/A5 (14 câu mỗi cột); ảnh cách số 2 mm, sau ảnh là dòng viết được hạ 4 mm so với baseline cũ để chữ học sinh cân với hình.
 
 ## Font
 
