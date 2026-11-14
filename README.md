@@ -39,6 +39,7 @@ Bấm **📥 Tải form Excel mẫu** trên trang để có đúng cấu trúc. 
 - **Matching 2:** lề trái 7 mm, phải 3,2 mm để mở rộng đồng thời toàn bộ vùng hình và ba cột prompt; tỷ lệ cột 30% / 33% / 37%.
 - **Flashcards, Anagram:** giữ lề 3 mm theo bố cục cũ.
 - **Typing 1: Nhìn hình viết chữ** in 28 câu/A5 (14 câu mỗi cột); ảnh cách số 2 mm, sau ảnh là dòng viết hạ 2,8 mm so với baseline cũ để chữ học sinh cân với hình.
+- **Typing 2: Cho tiếng Việt, viết tiếng Anh** và **Typing 3: Cho tiếng Anh, viết tiếng Việt** dùng A4 ngang. Mỗi tờ có hai bảng 60 dòng giống nhau đặt cạnh nhau như form dò từ; dòng có dấu tiếng Việt dùng font Unicode riêng để in đúng dấu.
 
 ## Font
 

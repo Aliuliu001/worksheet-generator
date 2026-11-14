@@ -28,7 +28,8 @@
         <label><input type="checkbox" name="worksheet" value="matching"> Matching 1: Look and Match</label>
         <label><input type="checkbox" name="worksheet" value="matching-2"> Matching 2: Picture Letter Match</label>
         <label><input type="checkbox" name="worksheet" value="typing-image"> Typing 1: Nhìn hình viết chữ</label>
-        <label><input type="checkbox" name="worksheet" value="typing-vietnamese"> Typing 2: Nghĩa Việt viết English</label>
+        <label><input type="checkbox" name="worksheet" value="typing-2"> Typing 2: Cho tiếng Việt, viết tiếng Anh</label>
+        <label><input type="checkbox" name="worksheet" value="typing-3"> Typing 3: Cho tiếng Anh, viết tiếng Việt</label>
       </div>
       <div class="settings-grid">
         <label>Số mã đề<select id="version-count"><option value="1">1 mã đề</option><option value="2">2 mã đề</option><option value="3">3 mã đề</option><option value="4">4 mã đề</option><option value="5">5 mã đề</option><option value="6">6 mã đề</option><option value="7">7 mã đề</option><option value="8">8 mã đề</option><option value="9">9 mã đề</option><option value="10">10 mã đề</option></select></label>
@@ -49,11 +50,11 @@
     </section>
 
     <section class="card action-card" aria-labelledby="export-title">
-      <h2 id="export-title">5. Tạo PDF</h2><p>PDF dùng khổ A5 dọc. Khi in, chọn <strong>Actual size / 100%</strong>, không chọn “Fit to page”. Matching luôn có một PDF đáp án riêng.</p>
+      <h2 id="export-title">5. Tạo PDF</h2><p>Các phiếu hình/Matching dùng A5 dọc; Typing 2 và Typing 3 dùng A4 ngang. Khi in, chọn <strong>Actual size / 100%</strong>, không chọn “Fit to page”. Matching luôn có một PDF đáp án riêng.</p>
       <button class="button primary" id="export-button" type="button" disabled>📄 Tạo và tải PDF</button><div class="progress" id="progress" aria-live="polite"></div>
     </section>
 
     <section class="card guide"><h2>Hướng dẫn nhanh & FAQ</h2><details open><summary>Excel và ảnh cần như thế nào?</summary><p>Dòng đầu tiên có 4 tiêu đề: <code>STT</code>, <code>English</code>, <code>Viet</code>, <code>ID_Anh</code>. ID_Anh chỉ ghi số, ví dụ <code>60</code>; ZIP có thể chứa <code>60.png</code>, <code>60.jpg</code> hoặc định dạng ảnh phổ biến khác.</p></details><details><summary>Vì sao có ZIP thay vì PDF?</summary><p>Một PDF được tải trực tiếp khi chỉ tạo một dạng và một mã đề. Chọn nhiều dạng hoặc nhiều mã đề sẽ tạo ZIP để không bỏ sót file nào.</p></details><details><summary>Matching có từ thừa không?</summary><p>Không. Cột từ tiếng Anh bên phải có đúng số từ tương ứng với số hình bên trái; PDF đáp án ghi cặp số–chữ cái.</p></details><details><summary>Chỉnh dữ liệu ở đâu?</summary><p>Sửa trực tiếp trong bảng kiểm tra rồi tạo PDF. Các sửa đổi chỉ áp dụng trong lần mở trang này.</p></details></section>
   </main>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script><script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script><script src="https://cdn.jsdelivr.net/npm/@pdf-lib/fontkit@1.1.1/dist/fontkit.umd.min.js"></script><script src="assets/js/app.js?v=11"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script><script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script><script src="https://cdn.jsdelivr.net/npm/@pdf-lib/fontkit@1.1.1/dist/fontkit.umd.min.js"></script><script src="assets/js/app.js?v=13"></script>
 </body></html>

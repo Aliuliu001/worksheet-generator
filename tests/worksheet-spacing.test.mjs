@@ -19,6 +19,7 @@ assert.match(source, /writingLineY[\s\S]*TYPING1_WRITING_LINE_DROP/, 'Preview Ty
 assert.match(source, /const imageX = numberW \+ mm\(2\)/, 'Typing 1 image must start 2 mm after the number slot');
 assert.match(source, /function drawDashedLinePdf/, 'PDF must explicitly draw dashed strokes');
 assert.match(html, /Typing 1: Nhìn hình viết chữ/, 'Typing 1 label must use the approved name');
-assert.match(html, /Typing 2: Nghĩa Việt viết English/, 'Typing 2 label must use the approved name');
+assert.match(html, /Typing 2: Cho tiếng Việt, viết tiếng Anh/, 'Typing 2 label must use the approved name');
+assert.match(html, /Typing 3: Cho tiếng Anh, viết tiếng Việt/, 'Typing 3 label must use the approved name');
 
 console.log('PASS worksheet asymmetric margin and Typing 1 line contract');
