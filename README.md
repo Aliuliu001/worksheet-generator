@@ -1,6 +1,6 @@
 # Tạo thẻ hình để cắt dán vào vở
 
-Trang web này thay cho Colab: chọn **1 file Excel** và **1 file ZIP ảnh**, sau đó tải về PDF thẻ hình để in/cắt/dán. File của người dùng chỉ được đọc trên trình duyệt; không được tải lên máy chủ.
+Trang web này thay cho Colab: tạo PDF thẻ hình hoặc phiếu Typing để in. Với Typing 2/3, có thể tải Excel hai cột hoặc dán trực tiếp English/Viet; ZIP ảnh chỉ cần cho các dạng có hình. File của người dùng chỉ được đọc trên trình duyệt; không được tải lên máy chủ.
 
 ## Dùng như thế nào
 

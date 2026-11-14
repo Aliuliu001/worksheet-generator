@@ -5,18 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#5c4a3a">
   <title>Bộ tạo phiếu bài tập tiếng Anh</title>
-  <link rel="stylesheet" href="assets/css/style.css?v=4">
+  <link rel="stylesheet" href="assets/css/style.css?v=5">
 </head>
 <body>
   <main class="page-shell">
-    <header><p class="eyebrow">BỘ TẠO PHIẾU BÀI TẬP</p><h1>Tạo thẻ hình và phiếu bài tập</h1><p class="intro">Chọn 1 Excel và 1 ZIP ảnh. Mọi xử lý diễn ra ngay trên trình duyệt; file không được tải lên máy chủ.</p></header>
+    <header><p class="eyebrow">BỘ TẠO PHIẾU BÀI TẬP</p><h1>Tạo thẻ hình và phiếu bài tập</h1><p class="intro">Tải Excel hoặc dán từ trực tiếp. Dữ liệu chỉ xử lý trên trình duyệt, không được tải lên máy chủ.</p></header>
 
     <section class="card" aria-labelledby="input-title">
-      <div class="section-heading"><div><h2 id="input-title">1. Chọn dữ liệu</h2><p>Kéo thả file vào ô tương ứng, hoặc bấm vào ô để chọn file.</p></div><button class="button secondary" id="template-button" type="button">📥 Tải form Excel mẫu</button></div>
+      <div class="section-heading"><div><h2 id="input-title">1. Nhập dữ liệu</h2><p>Phiếu Typing chỉ cần 2 cột English và Viet. Phiếu có hình vẫn cần Excel 4 cột và ZIP ảnh.</p></div><button class="button secondary" id="template-button" type="button">📥 Tải form Excel mẫu</button></div>
       <div class="upload-grid">
-        <label class="file-box" id="excel-box"><span class="file-icon">📗</span><span><strong>Kéo thả file Excel</strong><small>4 cột: STT, English, Viet, ID_Anh</small></span><input id="excel-file" type="file" accept=".xlsx,.xls,.csv" hidden></label>
-        <label class="file-box" id="zip-box"><span class="file-icon">🖼️</span><span><strong>Kéo thả file ZIP ảnh</strong><small>Ảnh đặt tên bằng số: 1.jpg, 2.webp…</small></span><input id="zip-file" type="file" accept=".zip" hidden></label>
-      </div><div class="file-status" id="file-status" aria-live="polite">Chưa chọn file nào.</div>
+        <label class="file-box" id="excel-box"><span class="file-icon">📗</span><span><strong>Kéo thả file Excel</strong><small>Typing: English, Viet · Phiếu hình: thêm STT, ID_Anh</small></span><input id="excel-file" type="file" accept=".xlsx,.xls,.csv" hidden></label>
+        <label class="file-box" id="zip-box"><span class="file-icon">🖼️</span><span><strong>Kéo thả ZIP ảnh (nếu cần)</strong><small>Ảnh đặt tên bằng số: 1.jpg, 2.webp…</small></span><input id="zip-file" type="file" accept=".zip" hidden></label>
+      </div>
+      <div class="paste-box"><label for="paste-vocabulary"><strong>📋 Dán thêm từ trực tiếp</strong><small>Dán 2 cột English và Viet từ Excel/Google Sheets. Có thể có hoặc không có dòng tiêu đề.</small></label><textarea id="paste-vocabulary" rows="5" placeholder="English[TAB]Viet&#10;apple[TAB]quả táo&#10;ice cream[TAB]kem"></textarea><div class="inline-actions"><button class="button secondary" id="paste-button" type="button">➕ Thêm từ đã dán vào bảng</button><button class="button danger" id="clear-rows-button" type="button">🗑️ Xóa toàn bộ bảng từ</button></div></div>
+      <div class="file-status" id="file-status" aria-live="polite">Chưa chọn file nào, hoặc dán từ trực tiếp.</div>
     </section>
 
     <section class="card" aria-labelledby="settings-title">
@@ -33,28 +35,29 @@
       </div>
       <div class="settings-grid">
         <label>Số mã đề<select id="version-count"><option value="1">1 mã đề</option><option value="2">2 mã đề</option><option value="3">3 mã đề</option><option value="4">4 mã đề</option><option value="5">5 mã đề</option><option value="6">6 mã đề</option><option value="7">7 mã đề</option><option value="8">8 mã đề</option><option value="9">9 mã đề</option><option value="10">10 mã đề</option></select></label>
-        <span class="hint">Typing nghĩa Việt luôn dùng cột Viet làm gợi ý và không dùng hình.</span>
+        <label id="typing-word-count-wrap">Số từ Typing muốn tạo<input id="typing-word-count" type="number" min="1" value="30" inputmode="numeric"><small>Tối đa 30 từ/bảng/trang. Hai bảng trái/phải lặp cùng danh sách.</small></label>
       </div>
-      <p class="hint">Thẻ hình luôn là A5 dọc 6 cột × 7 hàng; mỗi set lặp theo cột nguyên vẹn. Các phiếu bài tập dùng A5 dọc, tự sang trang khi cần.</p>
+      <fieldset class="typing-direction" id="typing-direction" hidden><legend>Ngôn ngữ gợi ý đang chọn</legend><label class="toggle-label"><input type="radio" name="typing-direction-choice" value="vi-to-en" checked> Tiếng Việt — học sinh viết English</label><label class="toggle-label"><input type="radio" name="typing-direction-choice" value="en-to-vi"> English — học sinh viết tiếng Việt</label><p class="hint">Lựa chọn này hiển thị rõ để anh kiểm tra. Typing 2 mặc định gợi ý tiếng Việt; Typing 3 mặc định gợi ý English.</p></fieldset>
+      <p class="hint">Thẻ hình luôn là A5 dọc 6 cột × 7 hàng. Typing 2/3 dùng A4 ngang, hai bảng kẻ ô rõ ràng.</p>
     </section>
 
     <section class="card" aria-labelledby="check-title">
-      <div class="section-heading"><div><h2 id="check-title">3. Kiểm tra dữ liệu</h2><p>Có thể sửa English, Viet và ID_Anh ngay trong bảng trước khi tạo PDF.</p></div><button class="button secondary" id="check-button" type="button">🔍 Kiểm tra file</button></div>
-      <div id="notice" class="notice muted">Chọn đủ Excel và ZIP, sau đó bấm “Kiểm tra file”.</div>
-      <div class="table-wrap" id="preview-wrap" hidden><table><thead><tr><th>STT</th><th>English</th><th>Viet</th><th>ID_Anh</th><th>Ảnh xem trước</th></tr></thead><tbody id="preview-body"></tbody></table></div>
+      <div class="section-heading"><div><h2 id="check-title">3. Kiểm tra và sửa dữ liệu</h2><p>Có thể sửa English, Viet và ID ảnh ngay trong bảng. Từ được dán thêm sẽ nằm chung tại đây.</p></div><button class="button secondary" id="check-button" type="button">🔍 Đọc file và kiểm tra</button></div>
+      <div id="notice" class="notice muted">Tải file hoặc dán từ, sau đó bấm “Đọc file và kiểm tra”.</div>
+      <div class="table-wrap" id="preview-wrap" hidden><table><thead><tr><th>STT</th><th>English</th><th>Viet</th><th>ID_Anh</th><th>Ảnh xem trước</th><th>Thao tác</th></tr></thead><tbody id="preview-body"></tbody></table></div>
     </section>
 
     <section class="card" id="pdf-preview-card" hidden aria-labelledby="pdf-preview-title">
-      <div class="section-heading"><div><h2 id="pdf-preview-title">4. Xem trước phiếu đang chọn</h2><p>Xem trang đầu của từng dạng đang chọn; Flashcards hiển thị các trang theo bố cục thẻ hình.</p></div><button class="button secondary" id="pdf-preview-button" type="button">👁️ Xem trước phiếu đang chọn</button></div>
+      <div class="section-heading"><div><h2 id="pdf-preview-title">4. Xem trước phiếu đang chọn</h2><p>Preview và PDF dùng cùng dữ liệu, số từ và bố cục.</p></div><button class="button secondary" id="pdf-preview-button" type="button">👁️ Xem trước phiếu đang chọn</button></div>
       <div id="pdf-preview-status" class="file-status"></div><div class="canvas-pages" id="canvas-pages"></div>
     </section>
 
     <section class="card action-card" aria-labelledby="export-title">
-      <h2 id="export-title">5. Tạo PDF</h2><p>Các phiếu hình/Matching dùng A5 dọc; Typing 2 và Typing 3 dùng A4 ngang. Khi in, chọn <strong>Actual size / 100%</strong>, không chọn “Fit to page”. Matching luôn có một PDF đáp án riêng.</p>
+      <h2 id="export-title">5. Tạo PDF</h2><p>Typing 2 và Typing 3 dùng A4 ngang. Khi in, chọn <strong>Actual size / 100%</strong>, không chọn “Fit to page”. Matching luôn có một PDF đáp án riêng.</p>
       <button class="button primary" id="export-button" type="button" disabled>📄 Tạo và tải PDF</button><div class="progress" id="progress" aria-live="polite"></div>
     </section>
 
-    <section class="card guide"><h2>Hướng dẫn nhanh & FAQ</h2><details open><summary>Excel và ảnh cần như thế nào?</summary><p>Dòng đầu tiên có 4 tiêu đề: <code>STT</code>, <code>English</code>, <code>Viet</code>, <code>ID_Anh</code>. ID_Anh chỉ ghi số, ví dụ <code>60</code>; ZIP có thể chứa <code>60.png</code>, <code>60.jpg</code> hoặc định dạng ảnh phổ biến khác.</p></details><details><summary>Vì sao có ZIP thay vì PDF?</summary><p>Một PDF được tải trực tiếp khi chỉ tạo một dạng và một mã đề. Chọn nhiều dạng hoặc nhiều mã đề sẽ tạo ZIP để không bỏ sót file nào.</p></details><details><summary>Matching có từ thừa không?</summary><p>Không. Cột từ tiếng Anh bên phải có đúng số từ tương ứng với số hình bên trái; PDF đáp án ghi cặp số–chữ cái.</p></details><details><summary>Chỉnh dữ liệu ở đâu?</summary><p>Sửa trực tiếp trong bảng kiểm tra rồi tạo PDF. Các sửa đổi chỉ áp dụng trong lần mở trang này.</p></details></section>
+    <section class="card guide"><h2>Hướng dẫn nhanh & FAQ</h2><details open><summary>Typing 2/3 nhập dữ liệu thế nào?</summary><p>Anh có thể tải Excel chỉ gồm <code>English</code>, <code>Viet</code>, hoặc dán trực tiếp hai cột vào ô dán. Dán thêm sẽ nối vào bảng hiện có; anh sửa/xóa dòng trong bảng trước khi tạo PDF.</p></details><details><summary>Khi nào cần ZIP ảnh?</summary><p>Chỉ các phiếu dùng hình mới cần ZIP và cột <code>ID_Anh</code>. Làm Typing 2/3 riêng thì không cần ZIP.</p></details><details><summary>Vì sao có ZIP thay vì PDF?</summary><p>Một PDF được tải trực tiếp khi chỉ tạo một dạng và một mã đề. Chọn nhiều dạng hoặc nhiều mã đề sẽ tạo ZIP để không bỏ sót file nào.</p></details></section>
   </main>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script><script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script><script src="https://cdn.jsdelivr.net/npm/@pdf-lib/fontkit@1.1.1/dist/fontkit.umd.min.js"></script><script src="assets/js/app.js?v=13"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script><script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script><script src="https://cdn.jsdelivr.net/npm/@pdf-lib/fontkit@1.1.1/dist/fontkit.umd.min.js"></script><script src="assets/js/app.js?v=14"></script>
 </body></html>

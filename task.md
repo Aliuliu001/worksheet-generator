@@ -55,7 +55,9 @@
 - [x] Đã nạp fixture 2 từ với ảnh thật qua browser, Preview và PDF thật chỉ còn hai khung A/B nét đứt bo góc; không còn vạch prompt hay vạch ngăn nhóm thừa.
 - [x] Đã nạp fixture ảnh thật Typing 1: PDF 28 câu có đủ 14 dòng/cột, không tràn; 29 câu tự sang trang hai. Dòng viết thấp hơn rõ ràng và không chạm hình/hàng kế.
 - [x] Matching 2 Preview dùng đúng các tọa độ baseline PDF (nhãn A–J và prompt), khớp sát hơn với bản in.
-- [x] Typing 2 (Việt → English) và Typing 3 (English → Việt): A4 ngang, 2 bảng lặp cạnh nhau, 60 dòng/bảng. Browser Preview + PDF thật đạt 60 câu/1 trang; 61 câu tự sang trang hai. PDF dùng Unicode font cho tiếng Việt.
+- [x] Typing 2/3: A4 ngang, 2 bảng lặp giống nhau; tối đa 30 từ/bảng/trang, cỡ chữ 13,5 pt, header đậm/căn giữa và có lưới kẻ ô đầy đủ. 31 từ tự thành 2 trang; PDF dùng Unicode font cho tiếng Việt.
+- [x] Typing 2/3 nhận Excel chỉ gồm English/Viet hoặc dán trực tiếp hai cột, dán nối thêm vào bảng đang có, sửa/xóa từng dòng trước khi xuất; chỉ làm Typing không cần ZIP.
+- [x] Matching 2: Preview dùng cùng font KGPen, vùng đo prompt đã trừ lề 2 mm như PDF để tránh Preview có chữ lớn hơn output.
 - [ ] In thử Actual size / 100% trên giấy A5/A4.
 
 ## Trải nghiệm và kiểm tra còn lại
