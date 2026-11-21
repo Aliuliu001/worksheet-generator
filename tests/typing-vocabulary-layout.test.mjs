@@ -7,7 +7,10 @@ assert.match(source, /WorksheetSupport\.vocabularyLayout\(\)/, 'Typing 2/3 must 
 assert.match(support, /orientation: 'landscape'/, 'Typing 2/3 must use approved A4 landscape');
 assert.match(support, /marginMm: 5/, 'Typing 2/3 needs 5mm margins');
 assert.match(support, /header: 'Full name: _+'/,'Typing needs only a Full name line header');
-assert.match(source, /function vocabularyCheckLayout\(index, columns\)/, 'Typing 2/3 must share one layout');
+assert.match(source, /function vocabularyCheckLayout\(index, columns, panel = 0\)/, 'Typing 2/3 must calculate a position for each of the two repeated panels.');
+assert.match(source, /const VOCABULARY_CHECK_ROWS_PER_PAGE = 60;/, 'Typing 2/3 must retain all 60 rows from the approved form on one A4 landscape page.');
+assert.match(source, /const VOCABULARY_CHECK_PANELS = 2;/, 'Typing 2/3 must repeat the same list in left and right panels.');
+assert.match(source, /for \(let panel = 0; panel < VOCABULARY_CHECK_PANELS; panel \+= 1\)/, 'PDF and Preview must render both repeated panels.');
 assert.match(source, /function makeVocabularyCheck\(items, mode, answer = false\)/, 'Typing 2/3 need answer rendering');
 assert.match(source, /function drawVocabularyCheckPreview\(canvas,items,mode/, 'Typing 2/3 need shared preview');
 assert.match(source, /mode === 'vi-to-en' \? item\.vi : item\.en/, 'Typing modes must reverse prompts');
