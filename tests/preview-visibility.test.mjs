@@ -14,8 +14,8 @@ assert.match(source, /const pages = flashPages\(items\)/, 'Flashcard Preview dis
 assert.match(source, /drawFlashcardPreview\(canvas, groups\)/, 'Flashcard Preview must render each planned PDF page.');
 
 assert.match(source, /function anagramPlan\(items\)/, 'Anagram must retain one shuffled plan for Preview and PDF.');
-assert.match(source, /async function makeAnagram\(entries\)/, 'Anagram PDF must receive the same prepared entries as Preview.');
-assert.match(source, /makeAnagram\(anagramEntries\)/, 'Anagram export must pass the shared prepared plan to PDF generation.');
+assert.match(source, /async function makeAnagram\(entries, answer = false\)/, 'Anagram PDF must receive the same prepared entries as Preview.');
+assert.match(source, /makeAnagram\(anagramEntries, true\)/, 'Anagram export must pass the shared prepared plan to PDF generation.');
 assert.match(source, /async function drawAnagramPreview\(/, 'Anagram must produce a real Preview canvas.');
 assert.match(source, /drawAnagramText\(page, entry,/, 'Anagram PDF must draw the prepared entry rather than scramble again.');
 assert.match(source, /function itemsKey\(items\).*item\.en/, 'Editing an English word must invalidate a cached Preview plan.');

@@ -1,0 +1,22 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+const source = fs.readFileSync(new URL('../assets/js/app.js', import.meta.url), 'utf8');
+const html = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+const support = fs.readFileSync(new URL('../assets/js/worksheet-support.js', import.meta.url), 'utf8');
+
+assert.match(html, /id="shuffle-preview-button"/, 'Preview card must expose Shuffle button.');
+assert.match(html, /id="preview-version"/, 'Multiple versions need a selected Preview code.');
+assert.match(source, /function invalidateWorksheetPlans\(/, 'Edits/settings must invalidate frozen worksheet plans.');
+assert.match(source, /function worksheetPlan\(/, 'Preview/export require a shared frozen worksheet plan.');
+assert.match(source, /shuffle-preview-button/, 'Shuffle action must prepare and redraw the selected code.');
+assert.match(source, /makeAnagram\(anagramEntries, true\)/, 'Anagram must export an answer key using the same entries.');
+assert.match(source, /makeTypingImage\(imageOrder, true\)/, 'Typing 1 must export an answer key.');
+assert.match(source, /makeVocabularyCheck\(textOrder, typingMode\(type, types\), true\)/, 'Typing 2/3 must export answer PDFs.');
+assert.match(support, /maxRows: 40/, 'Typing must cap at 40 words/page.');
+assert.match(source, /VOCABULARY_CHECK_MAX_ROWS = VOCABULARY\.maxRows/, 'Typing max must be centralized.');
+assert.match(source, /itemCount = VOCABULARY_CHECK_ROWS_PER_PAGE/, 'Typing layout must receive the visible page item count.');
+assert.match(source, /Math\.min\(mm\(9\)/, 'Sparse Typing rows must cap at 9 mm.');
+assert.match(source, /vocabularyCheckLayout\(0, columns, panel, items\.length\)/, 'PDF must calculate row height from the actual number of visible words.');
+assert.match(source, /vocabularyCheckLayout\(0,columns,panel,items\.length\)/, 'Preview must calculate row height from the actual number of visible words.');
+assert.match(source, /const headerH = first\.rowH/, 'Typing header must consume a dedicated row.');
+console.log('PASS answer, shuffle and flexible Typing contract');
