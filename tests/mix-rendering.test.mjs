@@ -4,6 +4,10 @@ const source = fs.readFileSync(new URL('../assets/js/app.js', import.meta.url), 
 assert.match(source, /function mixAnagramPrompt/, 'Mix Anagram must scramble its prompt.');
 assert.match(source, /function mixMatchingTerms/, 'Mix Matching must create a separate matching term list.');
 assert.match(source, /function drawMixWritingLine/, 'Mix Typing must provide a writing line.');
+assert.match(source, /function drawMixImagePreview/, 'Mix Preview must draw resolved images, not text placeholders.');
+assert.match(source, /await imageUrl\(state\.images\.get\(numericId\(item\.imageId\)\)\)/, 'Mix Preview must resolve the same ID image used by export.');
+assert.match(source, /function mixBlockHeight/, 'Mix packing must measure block height before assigning pages.');
+assert.match(source, /function buildMixPageLayout/, 'Mix Preview and PDF must share one coordinate layout.');
 assert.match(source, /Mix_Ma\$\{v\}_De\.pdf/, 'Mix proposal must use an explicit proposal filename.');
 assert.match(source, /Mix_Ma\$\{v\}_Dap_an\.pdf/, 'Mix answer must use an explicit answer filename.');
 console.log('PASS Mix exercise/answer rendering contract');
