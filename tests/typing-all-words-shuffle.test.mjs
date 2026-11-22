@@ -10,5 +10,5 @@ assert.match(source, /worksheetPlan\(version, types, validRows\(\), types\.some\
 assert.match(source, /version === 1 && !force \? \[\.\.\.textItems\] : shuffled\(textItems\)/);
 assert.match(source, /mix: types\.includes\('mix'\) \? buildCurrentMixPlan\(/);
 assert.match(source, /section\.matchingTerms = mixMatchingTerms\(section\.items\)/);
-assert.match(source, /const terms=section\.matchingTerms \|\| null/g);
+assert.match(source, /const terms=section\.matchingTerms\|\|null/g);
 console.log('PASS all-word pagination and frozen Shuffle/Mix plans');

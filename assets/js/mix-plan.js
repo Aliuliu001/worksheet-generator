@@ -1,13 +1,18 @@
-/* Pure Mix allocation and A4 page plan. */
+/* Pure Mix allocation. Rendering decides physical A4 page placement. */
 (function (root, factory) {
   const api = factory();
   if (typeof module !== 'undefined') module.exports = api;
   if (typeof window !== 'undefined') window.MixPlan = api;
   if (typeof exports === 'undefined') globalThis.MixPlan = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this, () => {
-  const IMAGE_TYPES = new Set(['anagram', 'matching', 'matching-2', 'typing-image']);
+  const IMAGE_TYPES = new Set(['anagram', 'matching', 'matching-2', 'matching-3', 'typing-image']);
   const TEXT_TYPES = new Set(['typing-2', 'typing-3']);
-  const LABELS = { anagram: 'Anagram', matching: 'Matching 1', 'matching-2': 'Matching 2', 'typing-image': 'Typing 1', 'typing-2': 'Typing 2', 'typing-3': 'Typing 3' };
+  const LABELS = {
+    anagram: 'Anagram', matching: 'Matching 1', 'matching-2': 'Matching 2',
+    'matching-3': 'Matching 3', 'typing-image': 'Typing 1',
+    'typing-2': 'Typing 2', 'typing-3': 'Typing 3',
+  };
+  const MIX_TYPES = new Set(['anagram', 'matching-2', 'matching-3', 'typing-image', 'typing-2', 'typing-3']);
   function clean(value) { return String(value ?? '').trim().replace(/\s+/g, ' '); }
   function normalizePair(en, vi) { return `${clean(en).toLocaleLowerCase()}\u0000${clean(vi).toLocaleLowerCase()}`; }
   function eligible(row, type) {
@@ -17,13 +22,12 @@
   }
   function validGroupSize(type, count) {
     if (type === 'matching') return count >= 6 && count % 6 === 0;
-    if (type === 'matching-2') return count >= 5 && (count % 5 === 0 || count % 10 === 0);
+    if (type === 'matching-2') return count >= 5 && count % 5 === 0;
+    if (type === 'matching-3') return count >= 2 && count <= 12;
     return count > 0;
   }
-  function minimumGroup(type) { return type === 'matching' ? 6 : type === 'matching-2' ? 5 : 1; }
   function buildMixPlan(inputRows, settings) {
     const rows = inputRows.map((row, index) => ({ ...row, id: String(row.id ?? index + 1), hasImage: row.hasImage ?? false }));
-    const sections = settings.filter((section) => LABELS[section.type] && Number(section.target) > 0).map((section, order) => ({ ...section, target: Number(section.target), order, items: [] }));
     const errors = []; const warnings = []; const seenPairs = new Map();
     for (const row of rows) {
       const pair = normalizePair(row.en, row.vi);
@@ -32,48 +36,36 @@
         else seenPairs.set(pair, row.id);
       }
     }
-    const unused = rows.slice(); const take = (section, count) => {
-      const chosen = [];
-      for (let index = 0; index < unused.length && chosen.length < count;) {
-        if (eligible(unused[index], section.type)) chosen.push(...unused.splice(index, 1)); else index += 1;
-      }
-      return chosen;
-    };
-    // Repeated rounds use every eligible row; no row returns to the pool.
-    while (unused.some((row) => sections.some((section) => eligible(row, section.type)))) {
-      let progressed = false;
-      // Allocate Vietnamese-dependent sections first so image-capable rows
-      // do not consume their only candidates.
-      const allocationOrder = [...sections].sort((a, b) => (TEXT_TYPES.has(b.type) ? 1 : 0) - (TEXT_TYPES.has(a.type) ? 1 : 0));
-      for (const section of allocationOrder) {
-        const candidates = unused.filter((row) => eligible(row, section.type));
-        if (!candidates.length) continue;
-        let count = Math.min(section.target, candidates.length);
-        if (IMAGE_TYPES.has(section.type) && TEXT_TYPES.has(sections.find((s) => s.type)?.type)) { /* no-op: explicit eligibility drives allocation */ }
-        if ((section.type === 'matching' || section.type === 'matching-2') && count < minimumGroup(section.type)) continue;
-        if (section.type === 'matching') count -= count % 6;
-        if (section.type === 'matching-2' && count > 5 && count < 10) count = 5;
-        const allocated = take(section, count);
-        if (allocated.length) { section.items.push(...allocated); progressed = true; }
-      }
-      if (!progressed) break;
+    const requested = settings.filter((section) => Number(section.target) > 0).map((section, order) => ({ ...section, target: Number(section.target), order }));
+    for (const section of requested) {
+      if (!MIX_TYPES.has(section.type)) errors.push(`${LABELS[section.type] || section.type} is not available in Mix. Matching 1 remains a separate six-item worksheet.`);
+      else if (!validGroupSize(section.type, section.target)) errors.push(section.type === 'matching-3'
+        ? 'Matching 3 must contain one set between 2 and 12 questions.'
+        : `${LABELS[section.type]} has an invalid requested total (${section.target}).`);
     }
-    for (const section of sections) {
-      const remainingEligible = unused.filter((row) => eligible(row, section.type));
-      if (remainingEligible.length && (section.type === 'matching' || section.type === 'matching-2')) errors.push(`${LABELS[section.type]} has ${remainingEligible.length} eligible row(s) left that cannot form a valid ${LABELS[section.type]} group.`);
-      const excluded = rows.filter((row) => !eligible(row, section.type));
-      if (excluded.length) warnings.push(`${LABELS[section.type]}: ${excluded.length} row(s) are not eligible for this section.`);
+    // Matching 3 is always first: its allocation order and print order must match.
+    const ordered = [...requested].sort((a, b) => (a.type === 'matching-3' ? -1 : b.type === 'matching-3' ? 1 : a.order - b.order));
+    const unused = rows.slice();
+    const sections = [];
+    for (const request of ordered) {
+      const candidates = unused.filter((row) => eligible(row, request.type));
+      if (candidates.length < request.target) {
+        errors.push(`${LABELS[request.type]} needs ${request.target} eligible words but only ${candidates.length} are available.`);
+        continue;
+      }
+      const picked = candidates.slice(0, request.target);
+      const pickedIds = new Set(picked.map((row) => row.id));
+      for (let index = unused.length - 1; index >= 0; index -= 1) if (pickedIds.has(unused[index].id)) unused.splice(index, 1);
+      const section = { type: request.type, label: LABELS[request.type], target: request.target, items: picked, order: sections.length };
+      sections.push(section);
+      const excluded = rows.filter((row) => !eligible(row, request.type)).length;
+      if (excluded) warnings.push(`${LABELS[request.type]}: ${excluded} row(s) are not eligible for this section.`);
     }
     const usedIds = sections.flatMap((section) => section.items.map((row) => row.id));
-    const pages = []; let page = { sections: [] };
-    for (const section of sections) {
-      for (let start = 0; start < section.items.length; start += section.target) {
-        if (page.sections.length === 3) { pages.push(page); page = { sections: [] }; }
-        page.sections.push({ type: section.type, label: LABELS[section.type], items: section.items.slice(start, start + section.target) });
-      }
-    }
-    if (page.sections.length) pages.push(page);
-    return { sections, pages, usedIds, unused, warnings, errors, totalUnique: rows.length };
+    return {
+      sections, pages: [{ sections }], usedIds, unused, remainingCount: unused.length,
+      warnings, errors, totalUnique: rows.length,
+    };
   }
-  return { normalizePair, eligible, validGroupSize, buildMixPlan, IMAGE_TYPES, TEXT_TYPES, LABELS };
+  return { normalizePair, eligible, validGroupSize, buildMixPlan, IMAGE_TYPES, TEXT_TYPES, LABELS, MIX_TYPES };
 });
