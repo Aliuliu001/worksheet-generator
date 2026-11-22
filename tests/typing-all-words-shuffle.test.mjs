@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+const html = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+const source = fs.readFileSync(new URL('../assets/js/app.js', import.meta.url), 'utf8');
+assert.match(html, /id="typing-word-count"[^>]*placeholder="Toàn bộ"/);
+assert.doesNotMatch(html, /id="typing-word-count"[^>]*value="30"/);
+assert.match(source, /if \(!raw\) return textRows\(\)\.length/);
+assert.match(source, /start \+= VOCABULARY_CHECK_ROWS_PER_PAGE/g);
+assert.match(source, /worksheetPlan\(version, types, validRows\(\), types\.some\(\(type\) => TEXT_TYPES\.has\(type\)\) \? selectedTypingItems\(\) : \[\], true\)/);
+assert.match(source, /version === 1 && !force \? \[\.\.\.textItems\] : shuffled\(textItems\)/);
+assert.match(source, /mix: types\.includes\('mix'\) \? buildCurrentMixPlan\(/);
+assert.match(source, /section\.matchingTerms = mixMatchingTerms\(section\.items\)/);
+assert.match(source, /const terms=section\.matchingTerms \|\| null/g);
+console.log('PASS all-word pagination and frozen Shuffle/Mix plans');
