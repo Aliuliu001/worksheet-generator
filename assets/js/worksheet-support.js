@@ -40,5 +40,7 @@
   function vocabularyLayout() {
     return { page: { widthMm: 297, heightMm: 210, orientation: 'landscape' }, marginMm: 5, header: 'Full name: ____________________', rows: 40, maxRows: 40, defaultRows: 30, headerHeightMm: 13, numberWidthMm: 12, minimumPromptWidthMm: 60, minimumAnswerWidthMm: 90, headerAlign: 'center', bodyAlign: 'left', flexibleColumns: true };
   }
-  return { clean, detectPasteDirection, parsePastedPairs, orientPastedPairs, vocabularyLayout };
+  function matching2PromptPosition(index) { return { row: Math.floor(index / 3), column: index % 3 }; }
+  function twoColumnPosition(index) { return { row: Math.floor(index / 2), column: index % 2 }; }
+  return { clean, detectPasteDirection, parsePastedPairs, orientPastedPairs, vocabularyLayout, matching2PromptPosition, twoColumnPosition };
 });

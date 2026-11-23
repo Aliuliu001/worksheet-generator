@@ -8,7 +8,8 @@ assert.match(support, /orientation: 'landscape'/, 'Typing 2/3 must use approved 
 assert.match(support, /marginMm: 5/, 'Typing 2/3 needs 5mm margins');
 assert.match(support, /header: 'Full name: _+/,'Typing needs only a Full name line header');
 assert.match(source, /const VOCABULARY_CHECK_HEADER_FONT_SIZE = 10\.5;/, 'Typing headers must be 4pt larger.');
-assert.match(source, /const VOCABULARY_CHECK_FONT_SIZE = 10;/, 'Typing body text must be 2pt larger.');
+assert.match(source, /const VOCABULARY_CHECK_FONT_SIZE = 12;/, 'Typing body text must be 2pt larger.');
+assert.match(source, /const VOCABULARY_CHECK_NUMBER_FONT_SIZE = 10\.5;/, 'Typing numbers must be 2pt larger.');
 assert.match(source, /function vocabularyColumnWidths\(items, mode, fontMeasure\)/, 'Typing columns must measure actual prompt width.');
 assert.match(support, /minimumAnswerWidthMm: 90/, 'Typing answer area must reserve the approved wide writing space.');
 assert.match(source, /function vocabularyCheckLayout\(index, columns, panel = 0, itemCount = VOCABULARY_CHECK_ROWS_PER_PAGE\)/, 'Typing 2/3 must calculate a position for each of the two repeated panels using the actual page word count.');

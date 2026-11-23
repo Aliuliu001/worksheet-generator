@@ -25,8 +25,8 @@ const end = source.indexOf('\n  function drawMatching2ColumnDividers', start);
 assert.ok(start >= 0 && end > start, 'Could not locate the active-divider helper');
 const helperSource = source.slice(start, end).replace('function matching2ActiveDividers', 'return function matching2ActiveDividers');
 const matching2ActiveDividers = new Function(helperSource)();
-for (const count of [1, 2, 4]) assert.deepEqual(matching2ActiveDividers({ prompts: Array(count) }), [], `${count} prompts: no vertical divider`);
-for (const count of [5, 7]) assert.deepEqual(matching2ActiveDividers({ prompts: Array(count) }), [0], `${count} prompts: only first divider`);
-for (const count of [8, 10]) assert.deepEqual(matching2ActiveDividers({ prompts: Array(count) }), [0, 1], `${count} prompts: both dividers`);
+assert.deepEqual(matching2ActiveDividers({ prompts: Array(1) }), [], 'One prompt: no vertical divider.');
+assert.deepEqual(matching2ActiveDividers({ prompts: Array(2) }), [0], 'Two prompts: one divider between populated columns.');
+for (const count of [3, 4, 5, 7, 10]) assert.deepEqual(matching2ActiveDividers({ prompts: Array(count) }), [0, 1], `${count} prompts: both dividers between populated columns.`);
 
 console.log('PASS Matching 2 shared layout and active-divider contract');
