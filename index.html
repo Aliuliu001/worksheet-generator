@@ -30,7 +30,8 @@
         <label><input type="checkbox" name="worksheet" value="matching"> Matching 1: Look and Match</label>
         <label><input type="checkbox" name="worksheet" value="matching-2"> Matching 2: Picture Letter Match</label>
         <label><input type="checkbox" name="worksheet" value="matching-3"> Matching 3: Look and Match linh hoạt (2–12 câu)</label>
-        <label id="matching-3-count-wrap" hidden>Số câu Matching 3 <input id="matching-3-count" type="number" min="2" max="12" value="6"></label>
+        <label id="matching-3-count-wrap" hidden>Số câu Matching 3 <input id="matching-3-count" type="number" min="2" max="12" value="6"><small>Mỗi bộ có 2–12 câu.</small></label>
+        <label id="matching-3-two-up-wrap" class="toggle-label" hidden><input id="matching-3-two-up" type="checkbox"> ✂️ In 2 bộ Matching 3 trên 1 tờ A4 ngang <small>Hai bộ cùng số câu và cùng hình; mỗi bên có đáp án xáo riêng. Khi in chọn A4 ngang, Actual size / 100%.</small></label>
         <label><input type="checkbox" name="worksheet" value="typing-image"> Typing 1: Nhìn hình viết chữ</label>
         <label><input type="checkbox" name="worksheet" value="typing-2"> Typing 2: Cho tiếng Việt, viết tiếng Anh</label>
         <label><input type="checkbox" name="worksheet" value="typing-3"> Typing 3: Cho tiếng Anh, viết tiếng Việt</label>
@@ -64,5 +65,5 @@
 
     <section class="card guide"><h2>Hướng dẫn nhanh & FAQ</h2><details open><summary>Typing 2/3 nhập dữ liệu thế nào?</summary><p>Anh có thể tải Excel chỉ gồm <code>English</code>, <code>Viet</code>, hoặc dán trực tiếp hai cột vào ô dán. Dán thêm sẽ nối vào bảng hiện có; anh sửa/xóa dòng trong bảng trước khi tạo PDF.</p></details><details><summary>Khi nào cần ZIP ảnh?</summary><p>Chỉ các phiếu dùng hình mới cần ZIP và cột <code>ID_Anh</code>. Làm Typing 2/3 riêng thì không cần ZIP.</p></details><details><summary>Vì sao có ZIP thay vì PDF?</summary><p>Một PDF được tải trực tiếp khi chỉ tạo một dạng và một mã đề. Chọn nhiều dạng hoặc nhiều mã đề sẽ tạo ZIP để không bỏ sót file nào.</p></details></section>
   </main>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script><script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script><script src="https://cdn.jsdelivr.net/npm/@pdf-lib/fontkit@1.1.1/dist/fontkit.umd.min.js"></script><script src="assets/js/mix-plan.js?v=3"></script><script src="assets/js/worksheet-support.js?v=3"></script><script src="assets/js/app.js?v=23"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script><script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script><script src="https://cdn.jsdelivr.net/npm/@pdf-lib/fontkit@1.1.1/dist/fontkit.umd.min.js"></script><script src="assets/js/mix-plan.js?v=3"></script><script src="assets/js/worksheet-support.js?v=3"></script><script src="assets/js/app.js?v=24"></script>
 </body></html>
